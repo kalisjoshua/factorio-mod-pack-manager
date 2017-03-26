@@ -1,0 +1,19 @@
+{
+  "name": "mod-pack-manager",
+  "version": "0.1.0",
+  "description": "Manage mod-packs; groups of mods.",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "factorio",
+    "mod",
+    "packs"
+  ],
+  "author": "Joshua T Kalis <kalisjoshua@gmail.com> (http://kalisjoshua.me)",
+  "license": "MIT",
+  "devDependencies": {
+    "electron-prebuilt": "^1.4.13"
+  }
+}
