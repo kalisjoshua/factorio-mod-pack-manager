@@ -1,0 +1,37 @@
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: $main-background;
+  background-image: $main-gradient;
+  background-attachment: fixed;
+  color: $main-color;
+}
+
+body {
+  font-family: arial, helvetica, tahoma, sans-serif;
+  padding: $gutter;
+}
+
+aside {
+  border-radius: $radius;
+  max-height: 100%;
+  overflow: scroll;
+  padding: 1ex;
+  position: fixed;
+  width: $aside - $gutter;
+}
+
+aside h1 {
+  margin: 0;
+}
+
+.content {
+  margin-left: $aside + $gutter;
+  padding: 0 $gutter;
+}
+
+.flex-container { display: flex; }

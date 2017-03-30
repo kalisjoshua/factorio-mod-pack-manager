@@ -2,20 +2,87 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Mod-pack Manager</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Factorio Mod-pack Manager</title>
+  <link rel="stylesheet" href="dist/all.css" />
 
 <body>
-  <h1>Mod-pack Manager</h1>
-
   <div class="notification">
     <span class="icon"></span>
     <p class="message"></p>
     <span class="close" data-close="notification" title="Close this notification.">&times;</span>
   </div>
 
-  <div class="content">
+  <main>
+    <aside class="mod-packs">
+      <form class="mod-filters" name="mod-filters">
+        <h1>Filter</h1>
 
-  </div>
+        <div class="form-field">
+          <label for="title">Title</label>
+          <div class="input-overlay--search">
+            <input class="data-entry" id="title" name="title" type="search" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="owner">Owner</label>
+          <div class="input-overlay--dropdown">
+            <select class="data-entry" name="owner">
+              <option value="">Any</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <fieldset class="pill-input" name="fieldset-installed">
+            <legend>Installed</legend>
+
+            <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
+            <label for="installed-any">Any</label>
+
+            <input class="data-entry" id="installed-yup" type="radio" name="installed" value="Yup" />
+            <label for="installed-yup">Yup</label>
+
+            <input class="data-entry" id="installed-nope" type="radio" name="installed" value="Nope" />
+            <label for="installed-nope">Nope</label>
+          </fieldset>
+        </div>
+
+        <div class="form-field">
+          <fieldset class="pill-input--vertical" name="packs-filter">
+            <legend>Pack</legend>
+          </fieldset>
+        </div>
+      </form>
+
+      <form name="just-the-packs">
+        <h1>Manage</h1>
+
+        <div class="form-field">
+          <span class="btn btn--small btn--warn" data-action="remove" title="Will not remove the downloaded mods.">Delete selected</span>
+        </div>
+
+        <div class="form-field">
+          <fieldset class="pill-input--vertical" name="my-packs">
+            <legend>My Mod-packs</legend>
+          </fieldset>
+        </div>
+
+        <div class="form-field">
+          <label for="name">New Pack Name</label>
+          <div class="flex-container">
+            <input class="data-entry" id="name" name="name" />
+            <button name="add-pack" title="Add new pack name" type="submit">&plus;</button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <span class="btn btn--good" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+        </div>
+      </form>
+    </aside>
+
+    <div class="content"></div>
+  </main>
 
   <script>require(`${__dirname}/app`);</script>

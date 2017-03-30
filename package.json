@@ -1,10 +1,15 @@
 {
   "name": "mod-pack-manager",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Manage mod-packs; groups of mods.",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "css": ". bin/styles.sh start",
+    "css:watch": ". bin/styles.sh watch",
+    "precss:watch": "npm run css",
+    "stop": ". bin/styles.sh stop",
+    "start": "electron .",
+    "prestart": "npm run css:watch"
   },
   "keywords": [
     "factorio",
@@ -14,6 +19,8 @@
   "author": "Joshua T Kalis <kalisjoshua@gmail.com> (http://kalisjoshua.me)",
   "license": "MIT",
   "devDependencies": {
-    "electron-prebuilt": "^1.4.13"
-  }
+    "electron-prebuilt": "^1.4.13",
+    "node-sass": "^4.5.1"
+  },
+  "dependencies": {}
 }

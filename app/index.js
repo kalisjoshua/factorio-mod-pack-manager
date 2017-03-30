@@ -2,19 +2,14 @@ const fs = require('fs')
 const path = require('path')
 
 const debounce = require('./debounce')
+const getMods = require('./getMods')
 const notification = require('./notification')
 
-const getMods = require('./getMods')
-
-const modCache = path.join(__dirname, '/mod-cache.json')
-
-const filters = {
-  installed: '',
-  owner: '',
-  title: '',
-}
+let allMods
+const store = require('./dataStore.json')
 
 // mods location
+// TODO: make this configurable in the UI
 const location = path
   .join(
     process.env.HOME,
@@ -27,134 +22,186 @@ const location = path
 // installed mods
 const installed = fs.readdirSync(location)
 
-function updateUI() {
-  const content = document.querySelector('.content')
+function renderUI() {
+  allMods = require('./mod-cache.json')
 
   notification()
+  updateModsListing()
+  updateOwners()
+  updatePacksListing()
 
-  const allMods = require('./mod-cache.json')
+  document
+    .querySelector('form[name="just-the-packs"]')
+    .addEventListener('submit', event => {
+      event.preventDefault()
 
-  const rowHeadings = 'Title Owner Installed'
-    .split(' ')
-    .map(str => `<th class="${str.toLowerCase()}">${str}</th>`)
-    .join('')
+      const name = event.target.name
 
-  const owners = new Set()
+      if (name.value) {
+        store[name.value] = []
+        name.value = ''
 
-  const modRows = allMods
+        updatePacksListing()
+      }
+    })
+
+  document
+    .querySelector('.mod-filters [name="fieldset-installed"]')
+    .addEventListener('change', updateModsListing)
+
+  document
+    .querySelector('.mod-filters [name="owner"]')
+    .addEventListener('change', updateModsListing)
+
+  document
+    .querySelector('.mod-filters input[name="title"]')
+    .addEventListener('keyup', debounce(updateModsListing))
+
+  document
+    .addEventListener('click', event => {
+      let node = event.target
+
+      while (!/header/i.test(node.nodeName) && node.parentNode) {
+        node = node.parentNode
+      }
+
+      if (node && node.parentNode) {
+        node.parentNode.classList.toggle('open')
+      }
+    })
+}
+
+function updateModsListing() {
+  const filters = {
+    installed: document.forms['mod-filters'].installed.value,
+    owner: document.forms['mod-filters'].owner.value,
+    title: document.forms['mod-filters'].title.value.toLowerCase(),
+  }
+
+  document.querySelector('.content').innerHTML = allMods
     .reduce((acc, mod) => {
-      owners.add(mod.owner)
-
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
         ? 'Yup'
         : 'Nope'
 
       const include =
         (filters.installed ? isInstalled === filters.installed : true) &&
-        (filters.owner ? mod.owner.indexOf(filters.owner) > -1 : true) &&
-        (filters.title ? mod.title.toLowerCase().indexOf(filters.title.toLowerCase()) > -1 : true)
+        (filters.owner ? mod.owner === filters.owner : true) &&
+        (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true)
 
       const obj = {
         download_url: mod.latest_release.download_url,
-        downloads: mod.downloads_count,
+        // downloads: mod.downloads_count,
         factorio_version: mod.latest_release.factorio_version,
         file_name: mod.latest_release.file_name,
         installed: isInstalled,
         owner: mod.owner.trim(),
         summary: mod.summary,
         title: mod.title,
-        version: mod.latest_release.version,
+        // version: mod.latest_release.version,
       }
 
       if (include) {
-        acc.push(`<tr>
-            <td>${obj.title}</td>
-            <td>${obj.owner || ''}</td>
-            <td>${obj.installed}</td>
-          </tr>`)
+        acc.push(`
+          <article class="mod-info">
+            <header>
+              <div class="col-title"><h3>${obj.title}</h3></div>
+              <div class="col-owner">by: ${obj.owner || ''}</div>
+            </header>
+
+            <section class="mod-summary">
+              <dl>
+                <dt>Summary</dt>
+                <dd>${obj.summary}</dd>
+
+                <dt>Factorio version</dt>
+                <dd>${obj.factorio_version}</dd>
+
+                <dt>Installed</dt>
+                <dd>${obj.installed}</dd>
+              </dl>
+            </section>
+          </article>`)
       }
 
       return acc;
     }, [])
-    // .map(mod => )
     .join('')
-
-  const installedList = `<select name="installed">${['', 'Yup', 'Nope']
-    .map(opt => `<option value="${opt}"${filters.installed === opt ? 'selected' : ''}>${opt}</option>`)
-    .join('')}</select>`
-
-  const ownersList = `<select name="owners">${[''].concat(Array.from(owners))
-    .map(owner => `<option value="${owner}"${filters.owner === owner ? 'selected' : ''}>${owner}</option>`)
-    .join('')}</select>`
-
-  const filtersRow = `<tr class="filters">${[
-    `<td><input name="title" value="${filters.title}" /></td>`,
-    `<td>${ownersList}</td>`,
-    `<td>${installedList}</td>`,
-  ].join('')}</tr>`
-
-  content.innerHTML = `<table>
-    <col />
-    <col style="width: 10em;" />
-    <col style="width: 6em;" />
-
-    <thead>
-    ${rowHeadings}
-    ${filtersRow}
-    </thead>
-    <tbody>
-    ${modRows}
-    </tbody>
-  </table>`
-
-  const installedSelector = '.filters select[name="installed"]'
-  document
-    .querySelector(installedSelector)
-    .addEventListener('change', event => {
-      filters.installed = event.target.value
-      updateUI()
-
-      const newElement = document.querySelector(installedSelector)
-
-      newElement.value = filters.installed
-    })
-
-  const ownerSelector = '.filters select[name="owners"]'
-  document
-    .querySelector(ownerSelector)
-    .addEventListener('change', event => {
-      filters.owner = event.target.value
-      updateUI()
-
-      const newElement = document.querySelector(ownerSelector)
-
-      newElement.value = filters.owner
-    })
-
-  const titleSelector = '.filters input[name="title"]'
-  document
-    .querySelector(titleSelector)
-    .addEventListener('keyup', debounce(event => {
-      filters.title = event.target.value
-      updateUI()
-
-      const newElement = document.querySelector(titleSelector)
-
-      newElement.value = newElement.value
-      newElement.focus()
-    }))
 }
 
-fs.stat(modCache, function (err, stat) {
+function updateOwners() {
+  const ownerFilter = document.forms['mod-filters'].owner
+
+  const owners = new Set()
+
+  allMods
+    .forEach(mod => owners.add(mod.owner))
+
+  Array.from(owners)
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .forEach(owner => {
+      const node = document.createElement('option')
+
+      node.value = owner
+      node.innerText = owner
+
+      ownerFilter.insertBefore(node, null)
+    })
+}
+
+function updatePacksListing() {
+  const packs = Object.keys(store)
+
+  const filterList = document.forms['mod-filters']['packs-filter']
+  const manageList = document.forms['just-the-packs']['my-packs']
+
+  Array.from(filterList.querySelectorAll('legend ~ *'))
+    .forEach(el => filterList.removeChild(el))
+
+  Array.from(manageList.querySelectorAll('legend ~ *'))
+    .forEach(el => manageList.removeChild(el))
+
+  function item(name, alt, list) {
+    const input = document.createElement('input')
+    const label = document.createElement('label')
+
+    label.setAttribute('for', `pick-${name}${alt}`)
+    label.innerHTML = name
+
+    input.setAttribute('id', `pick-${name}${alt}`)
+    input.setAttribute('name', 'picks')
+    input.setAttribute('type', 'checkbox')
+    input.setAttribute('value', name)
+
+    list.insertBefore(input, null)
+    list.insertBefore(label, null)
+  }
+
+  packs
+    .forEach(name => {
+      item(name, '--filter', filterList)
+      item(name, '--manage', manageList)
+    })
+}
+
+fs.stat(path.join(__dirname, '/mod-cache.json'), function (err, stat) {
   if (err) {
     notification('info', 'Fetching mods list from portal.')
 
     getMods()
       .then(all => {
-        fs.writeFile(modCache, JSON.stringify(all, null, 4), 'utf8')
+
+        // untested code!
+        return new Promise((resolve, reject) => {
+          fs.writeFile(modCache, JSON.stringify(all, null, 4), 'utf8', function (error) {
+            error
+              ? reject('Write error.')
+              : resolve('Success.')
+          })
+        })
       })
-      .then(updateUI)
+      .then(renderUI)
   } else {
-    updateUI()
+    renderUI()
   }
 })

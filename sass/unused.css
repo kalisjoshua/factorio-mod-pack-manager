@@ -1,0 +1,31 @@
+
+.filters > * {
+  padding: 1ex;
+}
+
+.mod-packs label {
+  display: block;
+  padding: 1ex 0;
+}
+
+.mod-packs input {
+  font-size: 1em;
+  padding: 1ex;
+  width: 100%;
+}
+
+.mod-packs form fieldset input,
+form fieldset label {
+  display: inline !important;
+  width: auto;
+}
+
+.flex-container input { border-radius: 4px 0 0 4px; }
+.flex-container button {
+  background: green;
+  border: 0;
+  border-radius: 0 4px 4px 0;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
