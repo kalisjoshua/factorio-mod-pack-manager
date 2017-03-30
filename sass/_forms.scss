@@ -1,8 +1,11 @@
+form { margin: 0; }
+
 .data-entry {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
   border: 0;
   border-bottom: 1px solid $btn-background;
   border-radius: 0;
+  color: $inverted-color;
   font-size: 1em;
   margin: 0;
   padding: 1ex;
@@ -10,6 +13,10 @@
 }
 
 .form-field { padding: 1ex 0; }
+
+.form-field.form-buttons,
+.form-field.form-buttons + * { padding-top: $gutter * 5; }
+.form-field.form-buttons:first-of-type { padding-top: 0; }
 
 .pill-input {
   input[type="checkbox"],
@@ -36,7 +43,6 @@
 
   :checked + label {
     background: $btn-background;
-    color: $btn-color;
   }
 }
 
@@ -51,7 +57,7 @@
 
   label {
     background: lighten($btn-background, 10%);
-    color: $btn-color;
+    color: $inverted-color;
     cursor: pointer;
     display: block;
     margin: 0;
@@ -76,7 +82,6 @@
 
 .btn,
 button {
-  background: lighten($btn-background, 10%);
   border: 0;
   border-radius: $radius;
   color: $btn-color;
@@ -84,8 +89,21 @@ button {
   padding: 1ex 2ex;
   transition: $transition;
 
-  &:hover {
-    background: $btn-background;
+  &--alternate {
+    background: $accent;
+    color: darken($accent, 90%);
+
+    &:hover {
+      background: lighten($accent, 10%);
+    }
+  }
+
+  &--good {
+    background: lighten($btn-background, 10%);
+
+    &:hover {
+      background: lighten($btn-background, 20%);
+    }
   }
 
   &--small {
@@ -94,9 +112,14 @@ button {
   }
 
   &--warn {
-    background: darken($btn-background--warn, 10%);
+    background: $btn-background--warn;
 
-    &:hover { background: $btn-background--warn; }
+    &:hover { background: lighten($btn-background--warn, 5%); }
+  }
+
+  &.btn--disabled,
+  &.btn--disabled:hover {
+    background: $main-background;
   }
 }
 
@@ -117,10 +140,7 @@ fieldset label {
   width: auto;
 }
 
-label { color: $btn-background; }
-
 legend {
-  color: $btn-background;
   margin-bottom: 1ex;
 }
 
@@ -145,6 +165,6 @@ legend {
 .input-overlay--dropdown:after { content: '\25BC'; }
 
 select {
-  color: $main-color;
+  color: inherit;
   -webkit-appearance: none;
 }

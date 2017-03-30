@@ -10,7 +10,7 @@
   &.open {
     background: $highlight-gradient;
 
-    header { color: $main-background; }
+    header { color: $inverted-color; }
   }
 
   &.open { padding-bottom: $gutter / 2; }
@@ -21,16 +21,22 @@
     display: flex;
     margin: $gutter / 2;
     padding: $gutter / 2 0;
+
+    h3 {
+      font-weight: 100;
+      margin: 0;
+      padding: 0;
+    }
   }
 }
 
 .mod-info header:after { content: '+'; }
 .mod-info.open header:after { content: '\00d7'; }
 
-.mod-info h3 {
-  font-weight: 100;
-  margin: 0;
-  padding: 0;
+.editing .mod-info header .btn { display: inline-block; }
+.mod-info header .btn {
+  display: none;
+  margin-right: 2ex;
 }
 
 .mod-info section { display: none; }

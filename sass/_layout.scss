@@ -9,18 +9,24 @@ html {
   background-image: $main-gradient;
   background-attachment: fixed;
   color: $main-color;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: arial, helvetica, tahoma, sans-serif;
-  padding: $gutter;
+  margin: 0;
+  padding: 0 ;
 }
 
 aside {
-  border-radius: $radius;
+  background: $inverted-background;
+  background-image: $aside-gradient;
+  border-radius: 0 $radius * 2 $radius * 2 0;
+  color: mix(white, $inverted-background, 80%);
   max-height: 100%;
   overflow: scroll;
-  padding: 1ex;
+  padding: $gutter * 3;
   position: fixed;
   width: $aside - $gutter;
 }
@@ -30,7 +36,7 @@ aside h1 {
 }
 
 .content {
-  margin-left: $aside + $gutter;
+  margin-left: $aside - $gutter;
   padding: 0 $gutter;
 }
 

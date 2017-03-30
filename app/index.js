@@ -6,7 +6,14 @@ const getMods = require('./getMods')
 const notification = require('./notification')
 
 let allMods
-const store = require('./dataStore.json')
+let dataStore = JSON.parse(fs.readFileSync('./app/dataStore.json', 'utf8'))
+const reverseLookup = Object.keys(dataStore)
+  .reduce((acc, key) => {
+    dataStore[key]
+      .forEach(id => acc[id] = acc[id] ? [...acc[id], key] : [key])
+
+    return acc;
+  }, {})
 
 // mods location
 // TODO: make this configurable in the UI
@@ -22,6 +29,79 @@ const location = path
 // installed mods
 const installed = fs.readdirSync(location)
 
+function addPackName(event) {
+  event.preventDefault()
+
+  const name = document.forms.manager.name
+
+  if (name.value) {
+    dataStore[name.value] = []
+    name.value = ''
+
+    updateDataStore()
+    updatePacksListing()
+  }
+}
+
+function modToggle(event) {
+  const mod = event.srcElement
+  const [prevText, nextText] = [mod.innerText, mod.dataset.toggleText]
+  const [prevClass, nextClass] = mod.dataset.toggleClass.split(',')
+
+  mod.innerText = nextText
+  mod.dataset.toggleText = prevText
+
+  mod.classList.remove(prevClass)
+  mod.classList.add(nextClass)
+  mod.dataset.toggleClass = `${nextClass},${prevClass}`
+
+  const packs = document.forms.manager['packs-list']
+    .querySelectorAll(':checked')
+
+  if (packs.length) {
+    const listItems = prevText === 'Add'
+      ? (list, id) => list.concat(id)
+      : (list, id) => list.filter(x => x !== id)
+
+    const membership = prevText === 'Add'
+      ? (name, id) => dataStore[name].push(id) && reverseLookup[id].push(name)
+      : (name, id) => {
+        dataStore[name] = dataStore[name].filter(x => x !== id)
+        reverseLookup[id] = reverseLookup[id].filter(x => x !== name)
+      }
+
+    Array.from(packs)
+      .forEach(pack => {
+        const { modId } = mod.dataset
+        const name = pack.value
+
+        if (prevText === 'Add') {
+          dataStore[name] ? dataStore[name].push(modId) : [modId]
+          reverseLookup[modId] = [...(reverseLookup[modId] || []), name]
+        } else {
+          dataStore[name] = dataStore[name].filter(x => x !== modId)
+          reverseLookup[modId] = reverseLookup[modId].filter(x => x !== name)
+        }
+      })
+
+    updateDataStore()
+    updateModsListing()
+  }
+}
+
+function removeModPack(event) {
+  const selected = document.forms.manager['packs-list']
+    .querySelectorAll(':checked')
+
+  if (selected.length) {
+    Array.from(selected)
+      .forEach(pack => delete dataStore[pack.value])
+
+    updateDataStore()
+    updatePacksListing()
+  }
+}
+
 function renderUI() {
   allMods = require('./mod-cache.json')
 
@@ -30,81 +110,112 @@ function renderUI() {
   updateOwners()
   updatePacksListing()
 
-  document
-    .querySelector('form[name="just-the-packs"]')
-    .addEventListener('submit', event => {
-      event.preventDefault()
+  document.forms.manager
+    .addEventListener('submit', addPackName)
 
-      const name = event.target.name
-
-      if (name.value) {
-        store[name.value] = []
-        name.value = ''
-
-        updatePacksListing()
-      }
-    })
-
-  document
-    .querySelector('.mod-filters [name="fieldset-installed"]')
+  document.forms.manager.isInstalled
     .addEventListener('change', updateModsListing)
 
-  document
-    .querySelector('.mod-filters [name="owner"]')
+  document.forms.manager.owner
     .addEventListener('change', updateModsListing)
 
-  document
-    .querySelector('.mod-filters input[name="title"]')
+  document.forms.manager['packs-filter']
+    .addEventListener('change', updateModsListing)
+
+  document.forms.manager['packs-list']
+    .addEventListener('change', toggleToggleButtons)
+
+  document.forms.manager.title
     .addEventListener('keyup', debounce(updateModsListing))
 
   document
-    .addEventListener('click', event => {
-      let node = event.target
+    .addEventListener('click', event =>
+      event.srcElement.dataset.toggleText
+        ? modToggle(event)
+        : toggleModInfo(event))
 
-      while (!/header/i.test(node.nodeName) && node.parentNode) {
-        node = node.parentNode
-      }
+  document
+    .querySelector('[data-action="remove"]')
+    .addEventListener('click', removeModPack)
+}
 
-      if (node && node.parentNode) {
-        node.parentNode.classList.toggle('open')
-      }
-    })
+function toggleModInfo(event) {
+  let node = event.target
+
+  while (!/header/i.test(node.nodeName) && node.parentNode) {
+    node = node.parentNode
+  }
+
+  if (node && node.parentNode) {
+    node.parentNode.classList.toggle('open')
+  }
+}
+
+function toggleToggleButtons() {
+  const editing = document.forms.manager['packs-list']
+    .querySelectorAll(':checked')
+    .length
+
+  document.body.classList
+    .toggle('editing', editing)
+}
+
+function updateDataStore() {
+  fs.writeFile('./app/dataStore.json', JSON.stringify(dataStore, null, 4), 'utf8', error => {
+    if (error) {
+      // TODO: handle write error
+    }
+  })
 }
 
 function updateModsListing() {
   const filters = {
-    installed: document.forms['mod-filters'].installed.value,
-    owner: document.forms['mod-filters'].owner.value,
-    title: document.forms['mod-filters'].title.value.toLowerCase(),
+    installed: document.forms.manager.installed.value,
+    owner: document.forms.manager.owner.value,
+    packs: Array.from(document.forms.manager['packs-filter']
+      .querySelectorAll(':checked'))
+      .map(x => x.value),
+    title: document.forms.manager.title.value.toLowerCase(),
   }
 
   document.querySelector('.content').innerHTML = allMods
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
-        ? 'Yup'
-        : 'Nope'
+      const inPack = reverseLookup[mod.id] && !!reverseLookup[mod.id].length
 
       const include =
-        (filters.installed ? isInstalled === filters.installed : true) &&
+        (filters.installed ? `${isInstalled}` === filters.installed : true) &&
         (filters.owner ? mod.owner === filters.owner : true) &&
-        (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true)
+        (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true) &&
+        (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true)
 
       const obj = {
         download_url: mod.latest_release.download_url,
         // downloads: mod.downloads_count,
         factorio_version: mod.latest_release.factorio_version,
         file_name: mod.latest_release.file_name,
-        installed: isInstalled,
+        id: mod.id,
+        installed: isInstalled ? 'Yup' : 'Nope',
         owner: mod.owner.trim(),
         summary: mod.summary,
         title: mod.title,
         // version: mod.latest_release.version,
       }
 
+      const btnClasses = 'btn--good btn--warn'.split(' ')
+      inPack && btnClasses.reverse()
+
+      const btnText = 'Add Remove'.split(' ')
+      inPack && btnText.reverse()
+
       if (include) {
         acc.push(`
           <article class="mod-info">
             <header>
+              <span class="btn btn--small btn--toggle ${btnClasses[0]}"
+                data-mod-id="${obj.id}"
+                data-toggle-class="${btnClasses.join(',')}"
+                data-toggle-text="${btnText[1]}">${btnText[0]}</span>
               <div class="col-title"><h3>${obj.title}</h3></div>
               <div class="col-owner">by: ${obj.owner || ''}</div>
             </header>
@@ -130,7 +241,7 @@ function updateModsListing() {
 }
 
 function updateOwners() {
-  const ownerFilter = document.forms['mod-filters'].owner
+  const ownerFilter = document.forms.manager.owner
 
   const owners = new Set()
 
@@ -150,10 +261,10 @@ function updateOwners() {
 }
 
 function updatePacksListing() {
-  const packs = Object.keys(store)
+  const packs = Object.keys(dataStore)
 
-  const filterList = document.forms['mod-filters']['packs-filter']
-  const manageList = document.forms['just-the-packs']['my-packs']
+  const filterList = document.forms.manager['packs-filter']
+  const manageList = document.forms.manager['packs-list']
 
   Array.from(filterList.querySelectorAll('legend ~ *'))
     .forEach(el => filterList.removeChild(el))

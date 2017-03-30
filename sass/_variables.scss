@@ -1,40 +1,29 @@
-$aside: 30ex;
+$aside: 42ex;
 $gutter: 1ex;
 $radius: 5px;
 $transition: 200ms;
 
-// Coolors Exported Palette - coolors.co/177e89-084c61-db3a34-ffc857-323031
-$seaweed: hsla(186%, 71%, 31%, 1);
-$midnight: hsla(194%, 85%, 21%, 1);
-$sunset: hsla(2%, 70%, 53%, 1);
-$mustard: hsla(40%, 100%, 67%, 1);
-$jet: hsla(330%, 2%, 19%, 1);
-$anti-white: hsla(204%, 20%, 95%, 1);
+// Coolors Exported Palette - coolors.co/a80b09-0b4f6c-01baef-fbfbff-ffa400
+$firebrick: #AF211F;
+$imperial: #0b4f6c;
+$cyan: #01baef;
+$platinum: #E5E5E8;
+$orange: #ffa400;
+$green: #49C438;
+$darkness: #444444;
 
-// Coolors Exported Palette - coolors.co/a80b09-0b4f6c-01baef-fbfbff-040f16
-$mordant: hsla(1%, 90%, 35%, 1);
-$imperial: hsla(198%, 82%, 23%, 1);
-$cyan: hsla(193%, 99%, 47%, 1);
-$ghost: hsla(180%, 100%, 100%, 1);
-$fogra: hsla(203%, 69%, 5%, 1);
+$accent: $green;
 
-// Coolors Exported Palette - coolors.co/eaeaea-0e4749-17bebb-e55812-efe7da
-$isabelline: hsla(0%, 0%, 92%, 1);
-$jungle: hsla(182%, 68%, 17%, 1);
-$tiffany: hsla(179%, 78%, 42%, 1);
-$flame: hsla(20%, 85%, 48%, 1);
-$eggshell: hsla(37%, 40%, 90%, 1);
+$main-color: $darkness;
+$main-background: $platinum;
+$inverted-background: $darkness;
+$inverted-color: white;
+$main-gradient: linear-gradient(240deg, white, $platinum);
 
-$accent: $mordant;
+$btn-color: $platinum;
+$btn-background: $imperial;
 
-$main-color: $jungle;
-$main-background: $isabelline;
-$main-gradient: linear-gradient(240deg, $eggshell, $isabelline);
-$flame-gradient: linear-gradient(120deg, $flame, lighten($mordant, 5%));
+$btn-background--warn: $firebrick;
 
-$btn-color: $isabelline;
-$btn-background: $jungle;
-
-$btn-background--warn: $flame;
-
-$highlight-gradient: linear-gradient(120deg, $tiffany, darken($tiffany, 15%));
+$aside-gradient: linear-gradient(-120deg, $darkness, mix($darkness, $imperial, 60%));
+$highlight-gradient: linear-gradient(120deg, $cyan, darken($cyan, 15%));

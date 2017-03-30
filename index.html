@@ -14,8 +14,10 @@
 
   <main>
     <aside class="mod-packs">
-      <form class="mod-filters" name="mod-filters">
-        <h1>Filter</h1>
+      <form name="manager">
+        <div class="form-field form-buttons">
+          <span class="btn btn--alternate btn--disabled" data-action="update">Update Mods</span>
+        </div>
 
         <div class="form-field">
           <label for="title">Title</label>
@@ -34,50 +36,48 @@
         </div>
 
         <div class="form-field">
-          <fieldset class="pill-input" name="fieldset-installed">
+          <fieldset class="pill-input" name="isInstalled">
             <legend>Installed</legend>
 
             <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
             <label for="installed-any">Any</label>
 
-            <input class="data-entry" id="installed-yup" type="radio" name="installed" value="Yup" />
+            <input class="data-entry" id="installed-yup" type="radio" name="installed" value="true" />
             <label for="installed-yup">Yup</label>
 
-            <input class="data-entry" id="installed-nope" type="radio" name="installed" value="Nope" />
+            <input class="data-entry" id="installed-nope" type="radio" name="installed" value="false" />
             <label for="installed-nope">Nope</label>
           </fieldset>
         </div>
 
         <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-filter">
-            <legend>Pack</legend>
+            <legend>Pack (filter)</legend>
           </fieldset>
-        </div>
-      </form>
-
-      <form name="just-the-packs">
-        <h1>Manage</h1>
-
-        <div class="form-field">
-          <span class="btn btn--small btn--warn" data-action="remove" title="Will not remove the downloaded mods.">Delete selected</span>
-        </div>
-
-        <div class="form-field">
-          <fieldset class="pill-input--vertical" name="my-packs">
-            <legend>My Mod-packs</legend>
-          </fieldset>
+          <p><em><small>Selecting packs in this list will filter the list of mods.</small></em></p>
         </div>
 
         <div class="form-field">
           <label for="name">New Pack Name</label>
           <div class="flex-container">
             <input class="data-entry" id="name" name="name" />
-            <button name="add-pack" title="Add new pack name" type="submit">&plus;</button>
+            <button class="btn btn--good" name="add-pack" title="Add new pack name" type="submit">&plus;</button>
           </div>
         </div>
 
+        <div class="form-field form-buttons">
+          <span class="btn btn--alternate btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+        </div>
+
         <div class="form-field">
-          <span class="btn btn--good" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+          <fieldset class="pill-input--vertical" name="packs-list">
+            <legend>Pack (management)</legend>
+          </fieldset>
+          <p><em><small>Selecting packs in this list will enable adding/removing mods.</small></em></p>
+        </div>
+
+        <div class="form-field form-buttons">
+          <span class="btn btn--warn" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
         </div>
       </form>
     </aside>
