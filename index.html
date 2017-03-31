@@ -6,17 +6,11 @@
   <link rel="stylesheet" href="dist/all.css" />
 
 <body>
-  <div class="notification">
-    <span class="icon"></span>
-    <p class="message"></p>
-    <span class="close" data-close="notification" title="Close this notification.">&times;</span>
-  </div>
-
   <main>
     <aside class="mod-packs">
       <form name="manager">
         <div class="form-field form-buttons">
-          <span class="btn btn--alternate btn--disabled" data-action="refresh">Update Mod Cache</span>
+          <span class="btn btn--warn" data-action="refresh">Update Mod Cache</span>
         </div>
 
         <div class="form-field">
@@ -57,10 +51,40 @@
         </div>
 
         <div class="form-field">
+          <label for="version">Factorio Version</label>
+          <div class="input-overlay--dropdown">
+            <select class="data-entry" name="version">
+              <option value="">Any</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <fieldset class="pill-input" name="hasUpdate">
+            <legend>Has Update</legend>
+
+            <input checked class="data-entry" id="update-any" type="radio" name="update" value="" />
+            <span class="pill__item">
+              <label for="update-any">Any</label>
+            </span>
+
+            <input class="data-entry" id="update-yup" type="radio" name="update" value="true" />
+            <span class="pill__item">
+              <label for="update-yup">Yup</label>
+            </span>
+
+            <input class="data-entry" id="update-nope" type="radio" name="update" value="false" />
+            <span class="pill__item">
+              <label for="update-nope">Nope</label>
+            </span>
+          </fieldset>
+        </div>
+
+        <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-filter">
             <legend>Packs (filter)</legend>
           </fieldset>
-          <p><em><small>Selecting packs in this list will filter the list of mods.</small></em></p>
+          <p><em><small>Select packs in this list to filter the list of mods.</small></em></p>
         </div>
 
         <div class="form-field">
@@ -72,23 +96,31 @@
         </div>
 
         <div class="form-field form-buttons">
-          <span class="btn btn--alternate btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+          <span class="btn btn--good btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
         </div>
 
         <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-list">
             <legend>Packs (add/remove)</legend>
           </fieldset>
-          <p><em><small>Selecting packs in this list will enable adding/removing mods.</small></em></p>
+          <p><em><small>Select packs in this list to enable adding/removing mods.</small></em></p>
         </div>
 
         <div class="form-field form-buttons">
-          <span class="btn btn--warn" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
+          <span class="btn btn--final" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
         </div>
       </form>
     </aside>
 
-    <div class="content"></div>
+    <section class="content">
+      <div class="notification">
+        <span class="icon"></span>
+        <p class="message"></p>
+        <span class="close" data-close="notification" title="Close this notification.">&times;</span>
+      </div>
+
+      <div class="mods-listing"></div>
+    </section>
   </main>
 
   <script>require(`${__dirname}/app`);</script>

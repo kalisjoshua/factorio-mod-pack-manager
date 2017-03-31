@@ -13,17 +13,17 @@ $green: #49C438;
 $darkness: #444444;
 
 $accent: $green;
+$blue: $imperial;
 
 $main-color: $darkness;
 $main-background: $platinum;
 $inverted-background: $darkness;
 $inverted-color: white;
-$main-gradient: linear-gradient(240deg, white, $platinum);
+$main-gradient: linear-gradient(120deg, white, $platinum);
 
-$btn-color: $platinum;
-$btn-background: $imperial;
+$theme-blue: $imperial;
+$theme-orange: $orange;
+$theme-green: $green;
+$theme-red: $firebrick;
 
-$btn-background--warn: $firebrick;
-
-$aside-gradient: linear-gradient(-120deg, $darkness, mix($darkness, $imperial, 60%));
 $highlight-gradient: linear-gradient(120deg, $cyan, darken($cyan, 15%));

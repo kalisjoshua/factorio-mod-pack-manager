@@ -7,11 +7,12 @@
   background: maroon;
   color: white;
   display: flex;
+  margin: $gutter 0;
 }
 
-.notification--error { background-color: orange; }
-.notification--info { background-color: blue; }
-.notification--success { background-color: green; }
+.notification--error { background-color: $theme-orange; }
+.notification--info { background-color: $theme-blue; }
+.notification--success { background-color: $theme-green; }
 
 .notification .close {
   cursor: pointer;

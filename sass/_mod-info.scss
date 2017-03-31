@@ -1,3 +1,13 @@
+.badge {
+  background: gainsboro;
+  border-radius: $gutter;
+  color: black;
+  display: inline-block;
+  font-size: 0.6em;
+  margin: 0 $gutter;
+  padding: $gutter / 2 $gutter;
+}
+
 .col-owner { flex: 0 0; flex-basis: 12em; }
 .col-title { flex: 1 0; }
 

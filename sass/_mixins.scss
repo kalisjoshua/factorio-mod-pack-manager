@@ -1,0 +1,8 @@
+  @mixin mix-btn($color) {
+    background: darken($color, 5%);
+    color: if(lightness($color) > 60, darken($color, 50%), lighten($color, 50%));
+
+    &:hover {
+      background: lighten($color, 5%);
+    }
+  }

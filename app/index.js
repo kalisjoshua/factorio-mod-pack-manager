@@ -6,7 +6,7 @@ const getMods = require('./getMods')
 const notification = require('./notification')
 
 let allMods
-let dataStore = JSON.parse(fs.readFileSync('./app/dataStore.json', 'utf8'))
+let dataStore = require('./dataStore.json')
 const reverseLookup = Object.keys(dataStore)
   .reduce((acc, key) => {
     dataStore[key]
@@ -28,6 +28,13 @@ const location = path
 
 // installed mods
 const installed = fs.readdirSync(location)
+const outdated = (function () {
+  const basename = str => str.replace(/_\d+\.\d+\.\d+\.zip$/, '')
+  const lookup = installed
+    .reduce((acc, file) => (acc[basename(file)] = file, acc), {})
+
+  return file => lookup[basename(file)] !== file
+}())
 
 function addPackName(event) {
   event.preventDefault()
@@ -41,6 +48,19 @@ function addPackName(event) {
     updateDataStore()
     updatePacksListing()
   }
+}
+
+function afterCacheUpdate(button) {
+  notification('info', 'Mods cache updated.')
+
+  // change to "Update Mods"
+  button.innerText = 'Update Installed Mods'
+  button.classList.remove('btn--disabled')
+  button.dataset.refreshed = true
+
+  updateModsListing()
+
+  setTimeout(notification, 4000)
 }
 
 function modToggle(event) {
@@ -109,6 +129,7 @@ function renderUI() {
   updateModsListing()
   updateOwners()
   updatePacksListing()
+  updateFactorioVersions()
 
   document.forms.manager
     .addEventListener('submit', addPackName)
@@ -117,6 +138,9 @@ function renderUI() {
     .addEventListener('change', updateModsListing)
 
   document.forms.manager.owner
+    .addEventListener('change', updateModsListing)
+
+  document.forms.manager.hasUpdate
     .addEventListener('change', updateModsListing)
 
   document.forms.manager['packs-filter']
@@ -128,6 +152,9 @@ function renderUI() {
   document.forms.manager.title
     .addEventListener('keyup', debounce(updateModsListing))
 
+  document.forms.manager.version
+    .addEventListener('change', updateModsListing)
+
   document
     .addEventListener('click', event =>
       event.srcElement.dataset.toggleText
@@ -137,6 +164,10 @@ function renderUI() {
   document
     .querySelector('[data-action="remove"]')
     .addEventListener('click', removeModPack)
+
+  document
+    .querySelector('[data-action="refresh"]')
+    .addEventListener('click', updateModsHandler)
 }
 
 function toggleModInfo(event) {
@@ -168,6 +199,35 @@ function updateDataStore() {
   })
 }
 
+function updateInstalledMods() {
+  console.log('TODO: updating installed mods')
+}
+
+function updateModCache(fn) {
+  notification('info', 'Fetching mods list from portal.')
+
+  // remove mods listing
+  document.querySelector('.mods-listing').innerText = ''
+
+  getMods()
+    .then(writeModsCache)
+    .then(fn)
+}
+
+function updateModsHandler(event) {
+  const button = event.target
+
+  // ignore disabled button clicks
+  if (button.classList.contains('btn--disabled')) return;
+
+  // disable button
+  button.classList.add('btn--disabled')
+
+  button.dataset.refreshed
+    ? updateInstalledMods()
+    : updateModCache(afterCacheUpdate.bind(null, button))
+}
+
 function updateModsListing() {
   const filters = {
     installed: document.forms.manager.installed.value,
@@ -176,18 +236,23 @@ function updateModsListing() {
       .querySelectorAll(':checked'))
       .map(x => x.value),
     title: document.forms.manager.title.value.toLowerCase(),
+    update: document.forms.manager.update.value,
+    version: document.forms.manager.version.value,
   }
 
-  document.querySelector('.content').innerHTML = allMods
+  document.querySelector('.mods-listing').innerHTML = allMods
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
+      const isOutdated = isInstalled && outdated(mod.latest_release.file_name)
       const inPack = reverseLookup[mod.id] && !!reverseLookup[mod.id].length
 
       const include =
         (filters.installed ? `${isInstalled}` === filters.installed : true) &&
         (filters.owner ? mod.owner === filters.owner : true) &&
+        (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true) &&
         (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true) &&
-        (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true)
+        (filters.update ? `${isOutdated}` === filters.update : true) &&
+        (filters.version ? `${mod.latest_release.factorio_version}` === filters.version : true)
 
       const obj = {
         download_url: mod.latest_release.download_url,
@@ -196,13 +261,14 @@ function updateModsListing() {
         file_name: mod.latest_release.file_name,
         id: mod.id,
         installed: isInstalled ? 'Yup' : 'Nope',
+        outdated: isOutdated ? '<small class="badge">Outdated</small>' : '',
         owner: mod.owner.trim(),
         summary: mod.summary,
         title: mod.title,
         // version: mod.latest_release.version,
       }
 
-      const btnClasses = 'btn--alternate btn--warn'.split(' ')
+      const btnClasses = 'btn--good btn--warn'.split(' ')
       inPack && btnClasses.reverse()
 
       const btnText = 'Add Remove'.split(' ')
@@ -216,7 +282,7 @@ function updateModsListing() {
                 data-mod-id="${obj.id}"
                 data-toggle-class="${btnClasses.join(',')}"
                 data-toggle-text="${btnText[1]}">${btnText[0]}</span>
-              <div class="col-title"><h3>${obj.title}</h3></div>
+              <div class="col-title"><h3>${obj.title}${obj.outdated}</h3></div>
               <div class="col-owner">by: ${obj.owner || ''}</div>
             </header>
 
@@ -276,8 +342,9 @@ function updatePacksListing() {
     const input = document.createElement('input')
     const label = document.createElement('label')
 
-    label.setAttribute('for', `pick-${name}${alt}`)
+    label.classList.add('pill__item')
     label.innerHTML = name
+    label.setAttribute('for', `pick-${name}${alt}`)
 
     input.setAttribute('id', `pick-${name}${alt}`)
     input.setAttribute('name', 'picks')
@@ -295,24 +362,41 @@ function updatePacksListing() {
     })
 }
 
+function updateFactorioVersions() {
+  const versionFilter = document.forms.manager.version
+
+  const versions = new Set()
+
+  const semanticOrder = str =>
+    str.split('.').map(n => `0${n}`.slice(-2)).join('')
+
+  allMods
+    .forEach(mod => versions.add(mod.latest_release.factorio_version))
+
+  Array.from(versions)
+    .sort((a, b) => semanticOrder(a).localeCompare(semanticOrder(b)))
+    .forEach(ver => {
+      const node = document.createElement('option')
+
+      node.value = ver
+      node.innerText = ver
+
+      versionFilter.insertBefore(node, null)
+    })
+}
+
+function writeModsCache(all) {
+
+  return new Promise((resolve, reject) => {
+    const content = JSON.stringify(all, null, 4)
+    fs.writeFile('./app/mod-cache.json', content, 'utf8', function (error) {
+      error
+        ? reject('Write error.')
+        : resolve('Success.')
+    })
+  })
+}
+
 fs.stat(path.join(__dirname, '/mod-cache.json'), function (err, stat) {
-  if (err) {
-    notification('info', 'Fetching mods list from portal.')
-
-    getMods()
-      .then(all => {
-
-        // untested code!
-        return new Promise((resolve, reject) => {
-          fs.writeFile(modCache, JSON.stringify(all, null, 4), 'utf8', function (error) {
-            error
-              ? reject('Write error.')
-              : resolve('Success.')
-          })
-        })
-      })
-      .then(renderUI)
-  } else {
-    renderUI()
-  }
+  err ? updateModCache(renderUI) : renderUI()
 })

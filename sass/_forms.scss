@@ -3,7 +3,7 @@ form { margin: 0; }
 .data-entry {
   background: rgba(255, 255, 255, 0.1);
   border: 0;
-  border-bottom: 1px solid $btn-background;
+  border-bottom: 1px solid $inverted-color;
   border-radius: 0;
   color: $inverted-color;
   font-size: 1em;
@@ -16,120 +16,85 @@ form { margin: 0; }
 
 .form-field.form-buttons,
 .form-field.form-buttons + * { padding-top: $gutter * 5; }
+
 .form-field.form-buttons:first-of-type { padding-top: 0; }
 
-.pill-input {
+[class*="pill-input"] {
   input[type="checkbox"],
   input[type="radio"] {
     display: none;
   }
 
-  label {
-    // background: rgba(255, 0, 0, 0.2);
-    cursor: pointer;
-    padding: $gutter $gutter;
-  }
+  .pill__item, label { cursor: pointer; }
 
   .pill__item {
-    background: lighten($btn-background, 10%);
-    color: $btn-color;
-    cursor: pointer;
     margin: 0;
-    padding: $gutter 0;
+    padding: $gutter;
     transition: $transition;
+    background: fade-out($cyan, 0.8);
+    color: white;
+
+    &:hover { background: fade-out($cyan, 0.4) }
   }
 
-  .pill__item:hover {
-    background: lighten($btn-background, 20%);
-  }
+  :checked + .pill__item { background: $cyan; }
+}
 
+.pill-input {
   .pill__item:first-of-type { border-radius: $radius 0 0 $radius; }
   .pill__item:last-of-type { border-radius: 0 $radius $radius 0; }
   .pill__item:nth-of-type(n+2) { margin-left: 1px; }
-
-
-  .pill__item label { padding-left: unquote("calc(#{$gutter} + 4px)"); }
-  .pill__item:last-of-type label { padding: 0 unquote("calc(#{$gutter} + 4px)"); }
-
-  :checked +.pill__item {
-    background: $accent;
-  }
+  .pill__item, label { padding: $gutter; }
+  .pill__item:not(:last-of-type) { padding-right: unquote("calc(#{$gutter} - 4px)"); }
 }
 
 .pill-input--vertical {
   max-height: 20em;
   overflow: scroll;
 
-  input[type="checkbox"],
-  input[type="radio"] {
-    display: none;
+  .pill__item { display: block; }
+  .pill__item:first-of-type { border-radius: $radius $radius 0 0; }
+  .pill__item:last-of-type { border-radius: 0 0 $radius $radius; }
+  .pill__item:first-of-type:last-of-type { border-radius: $radius; }
+  .pill__item:nth-of-type(n+1) { margin-bottom: 1px; }
+
+  .pill__item:before {
+    color: transparent;
+    content: '\2713';
+    padding-right: $gutter;
   }
 
-  label {
-    background: lighten($btn-background, 10%);
-    color: $inverted-color;
-    cursor: pointer;
-    display: block;
-    margin: 0;
-    padding: 1ex;
-    transition: $transition;
-  }
-
-  label:hover {
-    background: lighten($btn-background, 20%);
-  }
-
-  label:first-of-type { border-radius: $radius $radius 0 0; }
-  label:last-of-type { border-radius: 0 0 $radius $radius; }
-  label:first-of-type:last-of-type { border-radius: $radius; }
-  label:nth-of-type(n+1) { margin-bottom: 1px; }
-
-  :checked + label {
-    background: $accent;
-    color: $btn-color;
-  }
+  :checked + .pill__item:before { color: inherit; }
 }
 
 .btn,
 button {
   border: 0;
   border-radius: $radius;
-  color: $btn-color;
   cursor: pointer;
   padding: 1ex 2ex;
   transition: $transition;
 
-  &--alternate {
-    background: $accent;
-    color: darken($accent, 90%);
+  // final
+  // good - primary, secondary, tertiary
+  // warn
 
-    &:hover {
-      background: lighten($accent, 10%);
-    }
-  }
-
-  &--good {
-    background: lighten($btn-background, 10%);
-
-    &:hover {
-      background: lighten($btn-background, 20%);
-    }
-  }
+  &--final { @include mix-btn($theme-red); }
+  &--good { @include mix-btn($theme-green); }
+  &--primary { @include mix-btn($theme-green); }
+  &--secondary { @include mix-btn($theme-blue); }
+  // &--tertiary { @include mix-btn($theme-); }
+  &--warn { @include mix-btn($theme-orange); }
 
   &--small {
     font-size: 0.7em;
     font-weight: 100;
   }
 
-  &--warn {
-    background: $btn-background--warn;
-
-    &:hover { background: lighten($btn-background--warn, 5%); }
-  }
-
   &.btn--disabled,
   &.btn--disabled:hover {
     background: $main-background;
+    color: darken($main-background, 30%);
   }
 }
 
