@@ -202,7 +202,7 @@ function updateModsListing() {
         // version: mod.latest_release.version,
       }
 
-      const btnClasses = 'btn--good btn--warn'.split(' ')
+      const btnClasses = 'btn--alternate btn--warn'.split(' ')
       inPack && btnClasses.reverse()
 
       const btnText = 'Add Remove'.split(' ')

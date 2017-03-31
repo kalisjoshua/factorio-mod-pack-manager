@@ -7,9 +7,10 @@
     "css": ". bin/styles.sh start",
     "css:watch": ". bin/styles.sh watch",
     "precss:watch": "npm run css",
-    "stop": ". bin/styles.sh stop",
     "start": "electron .",
-    "prestart": "npm run css:watch"
+    "prestart": "npm run css:watch",
+    "poststart": "npm run stop",
+    "stop": ". bin/styles.sh stop"
   },
   "keywords": [
     "factorio",

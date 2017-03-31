@@ -16,7 +16,7 @@
     <aside class="mod-packs">
       <form name="manager">
         <div class="form-field form-buttons">
-          <span class="btn btn--alternate btn--disabled" data-action="update">Update Mods</span>
+          <span class="btn btn--alternate btn--disabled" data-action="refresh">Update Mod Cache</span>
         </div>
 
         <div class="form-field">
@@ -40,19 +40,25 @@
             <legend>Installed</legend>
 
             <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
-            <label for="installed-any">Any</label>
+            <span class="pill__item">
+              <label for="installed-any">Any</label>
+            </span>
 
             <input class="data-entry" id="installed-yup" type="radio" name="installed" value="true" />
-            <label for="installed-yup">Yup</label>
+            <span class="pill__item">
+              <label for="installed-yup">Yup</label>
+            </span>
 
             <input class="data-entry" id="installed-nope" type="radio" name="installed" value="false" />
-            <label for="installed-nope">Nope</label>
+            <span class="pill__item">
+              <label for="installed-nope">Nope</label>
+            </span>
           </fieldset>
         </div>
 
         <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-filter">
-            <legend>Pack (filter)</legend>
+            <legend>Packs (filter)</legend>
           </fieldset>
           <p><em><small>Selecting packs in this list will filter the list of mods.</small></em></p>
         </div>
@@ -71,7 +77,7 @@
 
         <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-list">
-            <legend>Pack (management)</legend>
+            <legend>Packs (add/remove)</legend>
           </fieldset>
           <p><em><small>Selecting packs in this list will enable adding/removing mods.</small></em></p>
         </div>

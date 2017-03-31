@@ -25,24 +25,34 @@ form { margin: 0; }
   }
 
   label {
+    // background: rgba(255, 0, 0, 0.2);
+    cursor: pointer;
+    padding: $gutter $gutter;
+  }
+
+  .pill__item {
     background: lighten($btn-background, 10%);
     color: $btn-color;
     cursor: pointer;
     margin: 0;
-    padding: 1ex;
+    padding: $gutter 0;
     transition: $transition;
   }
 
-  label:hover {
+  .pill__item:hover {
     background: lighten($btn-background, 20%);
   }
 
-  label:first-of-type { border-radius: $radius 0 0 $radius; }
-  label:last-of-type { border-radius: 0 $radius $radius 0; }
-  label:nth-of-type(n+2) { margin-left: -0.4ex; }
+  .pill__item:first-of-type { border-radius: $radius 0 0 $radius; }
+  .pill__item:last-of-type { border-radius: 0 $radius $radius 0; }
+  .pill__item:nth-of-type(n+2) { margin-left: 1px; }
 
-  :checked + label {
-    background: $btn-background;
+
+  .pill__item label { padding-left: unquote("calc(#{$gutter} + 4px)"); }
+  .pill__item:last-of-type label { padding: 0 unquote("calc(#{$gutter} + 4px)"); }
+
+  :checked +.pill__item {
+    background: $accent;
   }
 }
 
@@ -75,7 +85,7 @@ form { margin: 0; }
   label:nth-of-type(n+1) { margin-bottom: 1px; }
 
   :checked + label {
-    background: $btn-background;
+    background: $accent;
     color: $btn-color;
   }
 }
