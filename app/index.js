@@ -7,7 +7,13 @@ const getMods = require('./getMods')
 const notification = require('./notification')
 
 let allMods
-let dataStore = require('./dataStore.json')
+let dataStore
+try {
+  dataStore = require(__dirname + '/dataStore.json')
+} catch (e) {
+  fs.writeFileSync(__dirname + '/dataStore.json', '{}', 'utf8')
+  dataStore = {}
+}
 const reverseLookup = Object.keys(dataStore)
   .reduce((acc, key) => {
     dataStore[key]
@@ -17,7 +23,6 @@ const reverseLookup = Object.keys(dataStore)
   }, {})
 
 // mods location
-// TODO: make this configurable in the UI
 const location = path
   .join(
     process.env.HOME,
@@ -202,7 +207,12 @@ function removeModPack(event) {
 }
 
 function renderUI() {
-  allMods = require('./mod-cache.json')
+  try {
+    allMods = require(__dirname + '/mod-cache.json')
+  } catch (e) {
+    fs.writeFileSync(__dirname + '/mod-cache.json', '{}', 'utf8')
+    allMods = {}
+  }
 
   notification()
   updateModsListing()

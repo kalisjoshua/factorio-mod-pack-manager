@@ -1,3 +1,4 @@
+builds/
 dist/
 app/dataStore.json
 app/mod-cache.json
