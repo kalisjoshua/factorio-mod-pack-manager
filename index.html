@@ -35,7 +35,7 @@
 
             <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
             <span class="pill__item">
-              <label for="installed-any">Any</label>
+              <label for="installed-any">Either</label>
             </span>
 
             <input class="data-entry" id="installed-yup" type="radio" name="installed" value="true" />
@@ -65,7 +65,7 @@
 
             <input checked class="data-entry" id="update-any" type="radio" name="update" value="" />
             <span class="pill__item">
-              <label for="update-any">Any</label>
+              <label for="update-any">Either</label>
             </span>
 
             <input class="data-entry" id="update-yup" type="radio" name="update" value="true" />
@@ -78,6 +78,17 @@
               <label for="update-nope">Nope</label>
             </span>
           </fieldset>
+        </div>
+
+        <div class="form-field">
+          <label for="sort">Sort By</label>
+          <div class="input-overlay--dropdown">
+            <select class="data-entry" name="sort">
+              <option selected value="title">Title</option>
+              <option value="downloads_count">Downloads</option>
+              <option value="released_at">Updated</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-field">
@@ -96,7 +107,7 @@
         </div>
 
         <div class="form-field form-buttons">
-          <span class="btn btn--good btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+          <span class="btn btn--final" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
         </div>
 
         <div class="form-field">
@@ -106,8 +117,29 @@
           <p><em><small>Select packs in this list to enable adding/removing mods.</small></em></p>
         </div>
 
+        <div class="form-field">
+          <fieldset class="pill-input" name="download-option">
+            <legend>Download Missing Mods</legend>
+
+            <input class="data-entry" id="download-yup" type="radio" name="download" value="true" />
+            <span class="pill__item">
+              <label for="download-yup">Yup</label>
+            </span>
+
+            <input checked class="data-entry" id="download-nope" type="radio" name="download" value="false" />
+            <span class="pill__item">
+              <label for="download-nope">Nope</label>
+            </span>
+          </fieldset>
+        </div>
+
+        <div class="form-field">
+          <label for="dir">Mods Directory</label>
+          <input class="data-entry" id="dir" name="dir" />
+        </div>
+
         <div class="form-field form-buttons">
-          <span class="btn btn--final" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
+          <span class="btn btn--good btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
         </div>
       </form>
     </aside>

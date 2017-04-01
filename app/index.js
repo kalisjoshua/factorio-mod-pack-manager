@@ -1,4 +1,5 @@
 const fs = require('fs')
+const http = require('http')
 const path = require('path')
 
 const debounce = require('./debounce')
@@ -36,6 +37,59 @@ const outdated = (function () {
   return file => lookup[basename(file)] !== file
 }())
 
+function activateMods(event) {
+  if (!event.target.classList.contains('btn--disabled')) {
+    const filepath = `${location}/mod-list.json`
+
+    const ids = Array.from(document.forms.manager['packs-list']
+      .querySelectorAll(':checked'))
+      .map(item => dataStore[item.value])
+      .join().split(',')
+
+    const missing = []
+    const mods = allMods
+      .reduce((acc, mod) => {
+        if (ids.includes('' + mod.id)) {
+          // build mods-list.json
+          acc.push({ name: mod.name, enabled: true })
+
+          // check for any uninstalled mods
+          if (!installed.includes(mod.latest_release.file_name)) {
+            missing.push({
+              file: mod.latest_release.file_name,
+              name: mod.name,
+              url: mod.latest_release.download_url,
+            })
+          }
+        }
+
+        return acc
+      }, [])
+
+    mods.push({ name: 'base', endabled: 'true' })
+
+    const finalize = () =>
+      fs.writeFileSync(filepath, JSON.stringify({ mods }, null, 4), 'utf-8')
+
+    if (missing.length) {
+      const download = document.forms.manager['download-option']
+        .querySelector(':checked').value
+      if (download == 'true') {
+        alert('Sorry, not implemented yet.')
+        // console.log('get \'em')
+        // downloadMods(missing)
+        //   .then(() => console.log('got \'em'))
+        //   .then(finalize)
+      } else {
+        missing.length && alert(`Missing Mods: \n${missing.map(({name}) => name).join('\n')}`)
+      }
+    } else {
+      finalize()
+      alert('Mods activated.')
+    }
+  }
+}
+
 function addPackName(event) {
   event.preventDefault()
 
@@ -61,6 +115,31 @@ function afterCacheUpdate(button) {
   updateModsListing()
 
   setTimeout(notification, 4000)
+}
+
+function downloadMods(list) {
+
+  return Promise.all(list.map(mod => {
+
+    return new Promise((resolve, reject) => {
+      console.log(`http://mods.factorio.com/api/${mod.url}`)
+      resolve(mod.name)
+
+      // const dest = `${location}/${mod.file}`
+      // const fileStream = fs.createWriteStream(dest)
+      //
+      // http.get(
+      //   `http://mods.factorio.com/${mod.url}`,
+      //   response => {
+      //     response.pipe(fileStream)
+      //     fileStream.on('finish', () => fileStream.close(resolve(mod.name)))
+      //   })
+      //   .on('error', (error) => {
+      //     fs.unlink(dest)
+      //     console.error(error)
+      //   })
+    })
+  }))
 }
 
 function modToggle(event) {
@@ -131,6 +210,10 @@ function renderUI() {
   updatePacksListing()
   updateFactorioVersions()
 
+  document
+    .querySelector('[data-action="activate"]')
+    .addEventListener('click', activateMods)
+
   document.forms.manager
     .addEventListener('submit', addPackName)
 
@@ -189,6 +272,12 @@ function toggleToggleButtons() {
 
   document.body.classList
     .toggle('editing', editing)
+
+  document
+    .querySelector('[data-action="activate"]')
+    .classList.toggle('btn--disabled', !editing)
+
+  updateModsListing()
 }
 
 function updateDataStore() {
@@ -240,11 +329,15 @@ function updateModsListing() {
     version: document.forms.manager.version.value,
   }
 
+  const modIds = Array.from(document.forms.manager['packs-list']
+    .querySelectorAll(':checked'))
+    .reduce((acc, name) => acc.concat(dataStore[name.value]), [])
+
   document.querySelector('.mods-listing').innerHTML = allMods
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
       const isOutdated = isInstalled && outdated(mod.latest_release.file_name)
-      const inPack = reverseLookup[mod.id] && !!reverseLookup[mod.id].length
+      const inPack = modIds.includes('' + mod.id)
 
       const include =
         (filters.installed ? `${isInstalled}` === filters.installed : true) &&
@@ -256,16 +349,16 @@ function updateModsListing() {
 
       const obj = {
         download_url: mod.latest_release.download_url,
-        // downloads: mod.downloads_count,
+        downloads_count: mod.downloads_count,
         factorio_version: mod.latest_release.factorio_version,
         file_name: mod.latest_release.file_name,
         id: mod.id,
         installed: isInstalled ? 'Yup' : 'Nope',
         outdated: isOutdated ? '<small class="badge">Outdated</small>' : '',
         owner: mod.owner.trim(),
+        released_at: mod.latest_release.released_at,
         summary: mod.summary,
         title: mod.title,
-        // version: mod.latest_release.version,
       }
 
       const btnClasses = 'btn--good btn--warn'.split(' ')
@@ -273,6 +366,8 @@ function updateModsListing() {
 
       const btnText = 'Add Remove'.split(' ')
       inPack && btnText.reverse()
+
+      // title, downloads, released_at
 
       if (include) {
         acc.push(`
@@ -396,6 +491,8 @@ function writeModsCache(all) {
     })
   })
 }
+
+document.forms.manager.dir.value = location
 
 fs.stat(path.join(__dirname, '/mod-cache.json'), function (err, stat) {
   err ? updateModCache(renderUI) : renderUI()

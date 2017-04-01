@@ -1,4 +1,6 @@
 dist/
+app/dataStore.json
+app/mod-cache.json
 
 # Logs
 logs
