@@ -1,6 +1,6 @@
 {
   "name": "mod-pack-manager",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Manage mod-packs; groups of mods.",
   "main": "index.js",
   "scripts": {
