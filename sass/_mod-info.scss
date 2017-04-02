@@ -1,13 +1,3 @@
-.badge {
-  background: gainsboro;
-  border-radius: $gutter;
-  color: black;
-  display: inline-block;
-  font-size: 0.6em;
-  margin: 0 $gutter;
-  padding: $gutter / 2 $gutter;
-}
-
 .col-owner { flex: 0 0; flex-basis: 12em; }
 .col-title { flex: 1 0; }
 
@@ -39,9 +29,6 @@
     }
   }
 }
-
-.mod-info header:after { content: '+'; }
-.mod-info.open header:after { content: '\00d7'; }
 
 .editing .mod-info header .btn { display: inline-block; }
 .mod-info header .btn {

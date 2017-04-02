@@ -13,9 +13,8 @@ A way to manage groupings of mods for various games of Factorio.
 
 ## TODO
 
-  [ ] Hide account login when all mods are already "installed"
-  [ ] Enable sorting dropdown
-  [ ] Unify packs listing andding a toggle above for: "edit", and "add"
+  [ ] Bulk download of updated mods after cache refresh
+  [ ] (optional) Use IndexedDB for data storage; enable more complex querying
 
 
 [Mod Pack Manager]: https://github.com/kalisjoshua/factorio-mod-pack-manager

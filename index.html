@@ -7,96 +7,8 @@
 
 <body>
   <main>
-    <aside class="mod-packs">
-      <form name="manager">
-        <div class="form-field form-buttons">
-          <span class="btn btn--warn" data-action="refresh">Update Mod Cache</span>
-        </div>
-
-        <div class="form-field">
-          <label for="title">Title</label>
-          <div class="input-overlay--search">
-            <input class="data-entry" id="title" name="title" type="search" />
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label for="owner">Owner</label>
-          <div class="input-overlay--dropdown">
-            <select class="data-entry" name="owner">
-              <option value="">Any</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <fieldset class="pill-input" name="isInstalled">
-            <legend>Installed</legend>
-
-            <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
-            <span class="pill__item">
-              <label for="installed-any">Either</label>
-            </span>
-
-            <input class="data-entry" id="installed-yup" type="radio" name="installed" value="true" />
-            <span class="pill__item">
-              <label for="installed-yup">Yup</label>
-            </span>
-
-            <input class="data-entry" id="installed-nope" type="radio" name="installed" value="false" />
-            <span class="pill__item">
-              <label for="installed-nope">Nope</label>
-            </span>
-          </fieldset>
-        </div>
-
-        <div class="form-field">
-          <label for="version">Factorio Version</label>
-          <div class="input-overlay--dropdown">
-            <select class="data-entry" name="version">
-              <option value="">Any</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <fieldset class="pill-input" name="hasUpdate">
-            <legend>Has Update</legend>
-
-            <input checked class="data-entry" id="update-any" type="radio" name="update" value="" />
-            <span class="pill__item">
-              <label for="update-any">Either</label>
-            </span>
-
-            <input class="data-entry" id="update-yup" type="radio" name="update" value="true" />
-            <span class="pill__item">
-              <label for="update-yup">Yup</label>
-            </span>
-
-            <input class="data-entry" id="update-nope" type="radio" name="update" value="false" />
-            <span class="pill__item">
-              <label for="update-nope">Nope</label>
-            </span>
-          </fieldset>
-        </div>
-
-        <div class="form-field">
-          <label for="sort">Sort By</label>
-          <div class="input-overlay--dropdown">
-            <select class="data-entry" name="sort">
-              <option selected value="title">Title</option>
-              <option value="downloads_count">Downloads</option>
-              <option value="released_at">Updated</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <fieldset class="pill-input--vertical" name="packs-filter">
-            <legend>Packs (filter)</legend>
-          </fieldset>
-          <p><em><small>Select packs in this list to filter the list of mods.</small></em></p>
-        </div>
+    <form name="manager">
+      <aside class="mod-packs">
 
         <div class="form-field">
           <label for="name">New Pack Name</label>
@@ -106,31 +18,30 @@
           </div>
         </div>
 
-        <div class="form-field form-buttons">
-          <span class="btn btn--final" data-action="remove" title="Will not remove the downloaded mods.">Remove Selected</span>
-        </div>
-
         <div class="form-field">
           <fieldset class="pill-input--vertical" name="packs-list">
-            <legend>Packs (add/remove)</legend>
+            <legend>Packs</legend>
           </fieldset>
-          <p><em><small>Select packs in this list to enable adding/removing mods.</small></em></p>
         </div>
 
-        <div class="form-field">
-          <fieldset class="pill-input" name="download-option">
-            <legend>Download Missing Mods</legend>
+        <div class="form-field download-details">
+          <p><small>Mod Portal credentials are required for downloading mods; at least one of the mod packs selected includes mods that aren't yet <em>"installed"</em> (downloaded).</small></p>
+        </div>
 
-            <input class="data-entry" id="download-yup" type="radio" name="download" value="true" />
-            <span class="pill__item">
-              <label for="download-yup">Yup</label>
-            </span>
+        <div class="form-field download-details">
+          <label for="username">Username</label>
+          <input class="data-entry" id="username" name="username" />
+          <small><em>Mod Portal account username.</em></small>
+        </div>
 
-            <input checked class="data-entry" id="download-nope" type="radio" name="download" value="false" />
-            <span class="pill__item">
-              <label for="download-nope">Nope</label>
-            </span>
-          </fieldset>
+        <div class="form-field download-details">
+          <label for="password">Password</label>
+          <input class="data-entry" id="password" name="password" type="password" />
+          <small><em>Mod Portal account password.</em></small>
+        </div>
+
+        <div class="form-field form-buttons">
+          <span class="btn btn--good btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
         </div>
 
         <div class="form-field">
@@ -138,32 +49,131 @@
           <input class="data-entry" id="dir" name="dir" />
         </div>
 
-        <div class="form-field">
-          <label for="username">Username</label>
-          <input class="data-entry" id="username" name="username" />
-        </div>
-
-        <div class="form-field">
-          <label for="password">Password</label>
-          <input class="data-entry" id="password" name="password" type="password" />
-          <p><small><em>Username and password are your Mod Portal account; for authenticating to enable downloading. If you already have the mods there is no need to enter credentials.</em></small></p>
-        </div>
-
         <div class="form-field form-buttons">
-          <span class="btn btn--good btn--disabled" data-action="activate" title="Make all mods active for selected mod packs.">Activate selected</span>
+          <span class="btn btn--warn" data-action="refresh">Update Mod Cache</span>
         </div>
-      </form>
-    </aside>
 
-    <section class="content">
-      <div class="notification">
-        <span class="icon"></span>
-        <p class="message"></p>
-        <span class="close" data-close="notification" title="Close this notification.">&times;</span>
-      </div>
+      </aside>
 
-      <div class="mods-listing"></div>
-    </section>
+      <section class="content">
+        <div class="filter-headings">
+
+          <div class="flex-container">
+
+            <div class="form-field">
+              <fieldset class="pill-input" name="packs-filter">
+                <legend>In Pack(s)</legend>
+
+                <input class="data-entry" id="packs-zero" type="checkbox" name="packs" value="zero" />
+                <span class="pill__item">
+                  <label for="packs-zero">Zero</label>
+                </span>
+
+                <input class="data-entry" id="packs-selected" type="checkbox" name="packs" value="selected" />
+                <span class="pill__item">
+                  <label for="packs-selected">Selected</label>
+                </span>
+
+                <input class="data-entry" id="packs-any" type="checkbox" name="packs" value="any" />
+                <span class="pill__item">
+                  <label for="packs-any">Any</label>
+                </span>
+              </fieldset>
+            </div>
+
+            <div class="form-field">
+              <fieldset class="pill-input" name="isInstalled">
+                <legend>Installed</legend>
+
+                <input checked class="data-entry" id="installed-any" type="radio" name="installed" value="" />
+                <span class="pill__item">
+                  <label for="installed-any">Meh</label>
+                </span>
+
+                <input class="data-entry" id="installed-yup" type="radio" name="installed" value="true" />
+                <span class="pill__item">
+                  <label for="installed-yup">Yup</label>
+                </span>
+
+                <input class="data-entry" id="installed-nope" type="radio" name="installed" value="false" />
+                <span class="pill__item">
+                  <label for="installed-nope">Nope</label>
+                </span>
+              </fieldset>
+            </div>
+
+            <div class="form-field">
+              <fieldset class="pill-input" name="hasUpdate">
+                <legend>Has Update</legend>
+
+                <input checked class="data-entry" id="update-any" type="radio" name="update" value="" />
+                <span class="pill__item">
+                  <label for="update-any">Meh</label>
+                </span>
+
+                <input class="data-entry" id="update-yup" type="radio" name="update" value="true" />
+                <span class="pill__item">
+                  <label for="update-yup">Yup</label>
+                </span>
+
+                <input class="data-entry" id="update-nope" type="radio" name="update" value="false" />
+                <span class="pill__item">
+                  <label for="update-nope">Nope</label>
+                </span>
+              </fieldset>
+            </div>
+
+            <div class="form-field flex-grow">
+              <label for="sortby">Sort By</label>
+              <div class="input-overlay--dropdown">
+                <select class="data-entry" name="sortby">
+                  <option value="title">Title</option>
+                  <option value="downloads_count">Downloads</option>
+                  <option value="released_at">Last Updated</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field flex-grow">
+              <label for="version">Factorio Version</label>
+              <div class="input-overlay--dropdown">
+                <select class="data-entry" name="version">
+                  <option value="">Any</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="flex-container">
+            <div class="col-title">
+              <label for="title">Title</label>
+              <div class="input-overlay--search">
+                <input class="data-entry" id="title" name="title" type="search" />
+              </div>
+            </div>
+
+            <div class="col-owner">
+              <label for="owner">Owner</label>
+              <div class="input-overlay--dropdown">
+                <select class="data-entry" name="owner">
+                  <option value="">Any</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="notification">
+          <span class="icon"></span>
+          <p class="message"></p>
+          <span class="close" data-close="notification" title="Close this notification.">&times;</span>
+        </div>
+
+        <div class="mods-listing"></div>
+      </section>
+    </form>
   </main>
 
   <script>require(`${__dirname}/app`);</script>

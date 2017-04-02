@@ -40,3 +40,16 @@ aside h1 {
 }
 
 .flex-container { display: flex; }
+.flex-grow { flex: 1 0; }
+
+.filter-headings {
+  background: $inverted-background;
+  color: $inverted-color;
+  margin: -$gutter;
+  margin-bottom: $gutter;
+  padding: $gutter * 2 $gutter;
+
+  > div:nth-of-type(n+2) {
+    margin-top: $gutter * 2;
+  }
+}

@@ -34,7 +34,7 @@ const location = path
   )
 
 // installed mods
-const installed = fs.readdirSync(location)
+let installed = fs.readdirSync(location)
 const outdated = (function () {
   const basename = str => str.replace(/_\d+\.\d+\.\d+\.zip$/, '')
   const lookup = installed
@@ -47,30 +47,7 @@ function activateMods(event) {
   if (!event.target.classList.contains('btn--disabled')) {
     const filepath = `${location}/mod-list.json`
 
-    const ids = Array.from(document.forms.manager['packs-list']
-      .querySelectorAll(':checked'))
-      .map(item => dataStore[item.value])
-      .join().split(',')
-
-    const missing = []
-    const mods = allMods
-      .reduce((acc, mod) => {
-        if (ids.includes('' + mod.id)) {
-          // build mods-list.json
-          acc.push({ name: mod.name, enabled: true })
-
-          // check for any uninstalled mods
-          if (!installed.includes(mod.latest_release.file_name)) {
-            missing.push({
-              file: mod.latest_release.file_name,
-              name: mod.name,
-              url: mod.latest_release.download_url,
-            })
-          }
-        }
-
-        return acc
-      }, [])
+    const { missing, mods } = activeModsList()
 
     mods.push({ name: 'base', endabled: 'true' })
 
@@ -78,20 +55,50 @@ function activateMods(event) {
       fs.writeFileSync(filepath, JSON.stringify({ mods }, null, 4), 'utf-8')
 
     if (missing.length) {
-      const download = document.forms.manager['download-option']
-        .querySelector(':checked').value
-      if (download == 'true') {
-        console.log('get \'em')
-        downloadMods(missing)
-          .then(() => console.log('got \'em'))
-          .then(finalize)
-      } else {
-        missing.length && alert(`Missing Mods: \n${missing.map(({name}) => name).join('\n')}`)
-      }
+      console.log('gonna get \'em')
+      downloadMods(missing)
+        .then(() => {
+          console.log('got \'em')
+          finalize()
+          installed = fs.readdirSync(location)
+          console.log(installed)
+        })
     } else {
       finalize()
       alert('Mods activated.')
     }
+  }
+}
+
+function activeModsList() {
+  const ids = Array.from(document.forms.manager['packs-list']
+    .querySelectorAll(':checked'))
+    .map(item => dataStore[item.value])
+    .join().split(',')
+
+  const missing = []
+  const mods = allMods
+    .reduce((acc, mod) => {
+      if (ids.includes('' + mod.id)) {
+        // build mods-list.json
+        acc.push({ name: mod.name, enabled: true })
+
+        // check for any uninstalled mods
+        if (!installed.includes(mod.latest_release.file_name)) {
+          missing.push({
+            file: mod.latest_release.file_name,
+            name: mod.name,
+            url: mod.latest_release.download_url,
+          })
+        }
+      }
+
+      return acc
+    }, [])
+
+  return {
+    missing,
+    mods,
   }
 }
 
@@ -123,6 +130,24 @@ function afterCacheUpdate(button) {
 }
 
 function downloadMods(list) {
+  document.forms.manager.password
+    .parentNode
+    .classList
+    .toggle('field-error', !document.forms.manager.password.value)
+
+  document.forms.manager.username
+    .parentNode
+    .classList
+    .toggle('field-error', !document.forms.manager.username.value)
+
+  if (!document.forms.manager.username.value) {
+    throw new Error('Username is required.')
+  }
+
+  if (!document.forms.manager.password.value) {
+    throw new Error('Password is required.')
+  }
+
   const client = modPortal({
     password: document.forms.manager.password.value,
     username: document.forms.manager.username.value,
@@ -130,10 +155,6 @@ function downloadMods(list) {
 
   return client
     .download(list, `${location}/`)
-    .then(response => {
-      console.log('done')
-      console.log(response)
-    })
 }
 
 function modToggle(event) {
@@ -183,16 +204,12 @@ function modToggle(event) {
 }
 
 function removeModPack(event) {
-  const selected = document.forms.manager['packs-list']
-    .querySelectorAll(':checked')
+  event.preventDefault()
 
-  if (selected.length) {
-    Array.from(selected)
-      .forEach(pack => delete dataStore[pack.value])
+  delete dataStore[event.target.dataset.pack]
 
-    updateDataStore()
-    updatePacksListing()
-  }
+  updateDataStore()
+  updatePacksListing()
 }
 
 function renderUI() {
@@ -226,10 +243,25 @@ function renderUI() {
     .addEventListener('change', updateModsListing)
 
   document.forms.manager['packs-filter']
-    .addEventListener('change', updateModsListing)
+    .addEventListener('change', event => {
+      const checked = event.target.checked
+
+      const options = Array.from(document.forms.manager['packs-filter']
+        .querySelectorAll('[name="packs"]'))
+        .forEach(opt => opt.checked = false)
+
+      if (checked) {
+        event.target.checked = true
+      }
+
+      updateModsListing()
+    })
 
   document.forms.manager['packs-list']
     .addEventListener('change', toggleToggleButtons)
+
+  document.forms.manager.sortby
+    .addEventListener('change', updateModsListing)
 
   document.forms.manager.title
     .addEventListener('keyup', debounce(updateModsListing))
@@ -242,10 +274,6 @@ function renderUI() {
       event.srcElement.dataset.toggleText
         ? modToggle(event)
         : toggleModInfo(event))
-
-  document
-    .querySelector('[data-action="remove"]')
-    .addEventListener('click', removeModPack)
 
   document
     .querySelector('[data-action="refresh"]')
@@ -269,6 +297,11 @@ function toggleToggleButtons() {
     .querySelectorAll(':checked')
     .length
 
+  const { missing } = activeModsList()
+
+  document.body.classList
+    .toggle('authenticate', missing.length)
+
   document.body.classList
     .toggle('editing', editing)
 
@@ -288,7 +321,8 @@ function updateDataStore() {
 }
 
 function updateInstalledMods() {
-  console.log('TODO: updating installed mods')
+  // TODO: updating installed mods
+  alert('Sorry, not implemented yet.')
 }
 
 function updateModCache(fn) {
@@ -317,22 +351,45 @@ function updateModsHandler(event) {
 }
 
 function updateModsListing() {
+  const form = document.forms.manager
+
+  const selectedPacks = Array.from(form['packs-list']
+    .querySelectorAll(':checked'))
+    .map(opt => opt.value)
+
+  const packsFilter = (function (selected) {
+
+    return {
+      any: ({id}) => !!reverseLookup[id],
+      selected: ({id}) => reverseLookup[id] && selectedPacks
+        .some(name => reverseLookup[id].includes(name)),
+      zero: ({id}) => !reverseLookup[id],
+      '': () => true,
+    }[selected ? selected.value : '']
+  }(form['packs-filter'].querySelector(':checked')))
+
   const filters = {
-    installed: document.forms.manager.installed.value,
-    owner: document.forms.manager.owner.value,
-    packs: Array.from(document.forms.manager['packs-filter']
-      .querySelectorAll(':checked'))
-      .map(x => x.value),
-    title: document.forms.manager.title.value.toLowerCase(),
-    update: document.forms.manager.update.value,
-    version: document.forms.manager.version.value,
+    installed: form.installed.value,
+    owner: form.owner.value,
+    packs: packsFilter,
+    title: form.title.value.toLowerCase(),
+    update: form.update.value,
+    version: form.version.value,
   }
 
-  const modIds = Array.from(document.forms.manager['packs-list']
+  const modIds = Array.from(form['packs-list']
     .querySelectorAll(':checked'))
     .reduce((acc, name) => acc.concat(dataStore[name.value]), [])
 
+  console.log(form.sortby.value)
+  const sortMethod = {
+    'downloads_count': (a, b) => a.downloads_count > b.downloads_count ? -1 : 1,
+    'released_at': (a, b) => new Date(a.latest_release.released_at) > new Date(b.latest_release.released_at) ? -1 : 1,
+    'title': (a, b) => a.title > b.title ? 1 : -1,
+  }[form.sortby.value]
+
   document.querySelector('.mods-listing').innerHTML = allMods
+    .sort(sortMethod)
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
       const isOutdated = isInstalled && outdated(mod.latest_release.file_name)
@@ -341,7 +398,8 @@ function updateModsListing() {
       const include =
         (filters.installed ? `${isInstalled}` === filters.installed : true) &&
         (filters.owner ? mod.owner === filters.owner : true) &&
-        (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true) &&
+        (filters.packs(mod)) &&
+        // (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true) &&
         (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true) &&
         (filters.update ? `${isOutdated}` === filters.update : true) &&
         (filters.version ? `${mod.latest_release.factorio_version}` === filters.version : true)
@@ -377,7 +435,7 @@ function updateModsListing() {
                 data-toggle-class="${btnClasses.join(',')}"
                 data-toggle-text="${btnText[1]}">${btnText[0]}</span>
               <div class="col-title"><h3>${obj.title}${obj.outdated}</h3></div>
-              <div class="col-owner">by: ${obj.owner || ''}</div>
+              <div class="col-owner">${obj.owner || ''}</div>
             </header>
 
             <section class="mod-summary">
@@ -423,11 +481,7 @@ function updateOwners() {
 function updatePacksListing() {
   const packs = Object.keys(dataStore)
 
-  const filterList = document.forms.manager['packs-filter']
   const manageList = document.forms.manager['packs-list']
-
-  Array.from(filterList.querySelectorAll('legend ~ *'))
-    .forEach(el => filterList.removeChild(el))
 
   Array.from(manageList.querySelectorAll('legend ~ *'))
     .forEach(el => manageList.removeChild(el))
@@ -435,15 +489,23 @@ function updatePacksListing() {
   function item(name, alt, list) {
     const input = document.createElement('input')
     const label = document.createElement('label')
-
-    label.classList.add('pill__item')
-    label.innerHTML = name
-    label.setAttribute('for', `pick-${name}${alt}`)
+    const span = document.createElement('span')
 
     input.setAttribute('id', `pick-${name}${alt}`)
     input.setAttribute('name', 'picks')
     input.setAttribute('type', 'checkbox')
     input.setAttribute('value', name)
+
+    label.classList.add('pill__item', 'pack-item')
+    label.innerHTML = name
+    label.setAttribute('for', `pick-${name}${alt}`)
+
+    span.classList.add('remove-pack')
+    span.dataset.pack = name
+    span.innerHTML = '&times;'
+    span.title = `Remove this mod; ${name}.`
+    span.addEventListener('click', removeModPack)
+    label.appendChild(span)
 
     list.insertBefore(input, null)
     list.insertBefore(label, null)
@@ -451,7 +513,6 @@ function updatePacksListing() {
 
   packs
     .forEach(name => {
-      item(name, '--filter', filterList)
       item(name, '--manage', manageList)
     })
 }
