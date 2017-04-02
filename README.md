@@ -11,5 +11,11 @@ A way to manage groupings of mods for various games of Factorio.
       - Electron-packager - for bundling the app to distribute
   3. `npm start` - run the application
 
+## TODO
+
+  [ ] Hide account login when all mods are already "installed"
+  [ ] Enable sorting dropdown
+  [ ] Unify packs listing andding a toggle above for: "edit", and "add"
+
 
 [Mod Pack Manager]: https://github.com/kalisjoshua/factorio-mod-pack-manager

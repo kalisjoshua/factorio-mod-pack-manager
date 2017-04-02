@@ -4,6 +4,7 @@ const path = require('path')
 
 const debounce = require('./debounce')
 const getMods = require('./getMods')
+const modPortal = require('./modPortal')
 const notification = require('./notification')
 
 let allMods
@@ -80,11 +81,10 @@ function activateMods(event) {
       const download = document.forms.manager['download-option']
         .querySelector(':checked').value
       if (download == 'true') {
-        alert('Sorry, not implemented yet.')
-        // console.log('get \'em')
-        // downloadMods(missing)
-        //   .then(() => console.log('got \'em'))
-        //   .then(finalize)
+        console.log('get \'em')
+        downloadMods(missing)
+          .then(() => console.log('got \'em'))
+          .then(finalize)
       } else {
         missing.length && alert(`Missing Mods: \n${missing.map(({name}) => name).join('\n')}`)
       }
@@ -123,28 +123,17 @@ function afterCacheUpdate(button) {
 }
 
 function downloadMods(list) {
+  const client = modPortal({
+    password: document.forms.manager.password.value,
+    username: document.forms.manager.username.value,
+  })
 
-  return Promise.all(list.map(mod => {
-
-    return new Promise((resolve, reject) => {
-      console.log(`http://mods.factorio.com/api/${mod.url}`)
-      resolve(mod.name)
-
-      // const dest = `${location}/${mod.file}`
-      // const fileStream = fs.createWriteStream(dest)
-      //
-      // http.get(
-      //   `http://mods.factorio.com/${mod.url}`,
-      //   response => {
-      //     response.pipe(fileStream)
-      //     fileStream.on('finish', () => fileStream.close(resolve(mod.name)))
-      //   })
-      //   .on('error', (error) => {
-      //     fs.unlink(dest)
-      //     console.error(error)
-      //   })
+  return client
+    .download(list, `${location}/`)
+    .then(response => {
+      console.log('done')
+      console.log(response)
     })
-  }))
 }
 
 function modToggle(event) {
