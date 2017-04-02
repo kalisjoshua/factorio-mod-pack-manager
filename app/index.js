@@ -497,7 +497,7 @@ function updatePacksListing() {
     input.setAttribute('value', name)
 
     label.classList.add('pill__item', 'pack-item')
-    label.innerHTML = name
+    label.innerHTML = `${name} (${dataStore[name].length})`
     label.setAttribute('for', `pick-${name}${alt}`)
 
     span.classList.add('remove-pack')
