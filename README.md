@@ -13,8 +13,8 @@ A way to manage groupings of mods for various games of Factorio.
 
 ## TODO
 
-  [ ] Bulk download of updated mods after cache refresh
-  [ ] (optional) Use IndexedDB for data storage; enable more complex querying
+  - [ ] Bulk download of updated mods after cache refresh
+  - [ ] (optional) Use IndexedDB for data storage; enable more complex querying
 
 
 [Mod Pack Manager]: https://github.com/kalisjoshua/factorio-mod-pack-manager
