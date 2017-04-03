@@ -213,10 +213,12 @@ function modToggle(event) {
 function removeModPack(event) {
   event.preventDefault()
 
-  delete dataStore[event.target.dataset.pack]
+  if (confirm(`Delete ${event.target.dataset.pack}?`)) {
+    delete dataStore[event.target.dataset.pack]
 
-  updateDataStore()
-  updatePacksListing()
+    updateDataStore()
+    updatePacksListing()
+  }
 }
 
 function renderUI() {
