@@ -44,13 +44,21 @@ const outdated = (function () {
 }())
 
 function activateMods(event) {
-  if (!event.target.classList.contains('btn--disabled')) {
+  const button = event.target
+  const disabledClass = 'btn--disabled'
+
+  if (!button.classList.contains(disabledClass)) {
+    button.classList.add(disabledClass)
+
     const filepath = `${location}/mod-list.json`
 
     const { missing, mods } = activeModsList()
 
-    const finalize = () =>
+    const finalize = () => {
       fs.writeFileSync(filepath, JSON.stringify({ mods }, null, 4), 'utf-8')
+      alert('Mods activated.')
+      button.classList.remove(disabledClass)
+    }
 
     if (missing.length) {
       console.log('gonna get \'em')
@@ -59,11 +67,9 @@ function activateMods(event) {
           console.log('got \'em')
           finalize()
           installed = fs.readdirSync(location)
-          console.log(installed)
         })
     } else {
       finalize()
-      alert('Mods activated.')
     }
   }
 }
@@ -200,6 +206,7 @@ function modToggle(event) {
     updateModsListing()
   }
 
+  toggleAuthenticate()
   updatePacksListing()
 }
 
@@ -280,6 +287,13 @@ function renderUI() {
     .addEventListener('click', updateModsHandler)
 }
 
+function toggleAuthenticate() {
+  const { missing } = activeModsList()
+
+  document.body.classList
+    .toggle('authenticate', missing.length)
+}
+
 function toggleModInfo(event) {
   let node = event.target
 
@@ -297,11 +311,6 @@ function toggleToggleButtons() {
     .querySelectorAll(':checked')
     .length
 
-  const { missing } = activeModsList()
-
-  document.body.classList
-    .toggle('authenticate', missing.length)
-
   document.body.classList
     .toggle('editing', editing)
 
@@ -309,6 +318,7 @@ function toggleToggleButtons() {
     .querySelector('[data-action="activate"]')
     .classList.toggle('btn--disabled', !editing)
 
+  toggleAuthenticate()
   updateModsListing()
 }
 
