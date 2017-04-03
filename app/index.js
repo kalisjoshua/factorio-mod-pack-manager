@@ -40,7 +40,7 @@ const outdated = (function () {
   const lookup = installed
     .reduce((acc, file) => (acc[basename(file)] = file, acc), {})
 
-  return file => lookup[basename(file)] !== file
+  return file => lookup[basename(file)] && lookup[basename(file)] !== file
 }())
 
 function activateMods(event) {
@@ -201,6 +201,8 @@ function modToggle(event) {
     updateDataStore()
     updateModsListing()
   }
+
+  updatePacksListing()
 }
 
 function removeModPack(event) {
@@ -381,7 +383,6 @@ function updateModsListing() {
     .querySelectorAll(':checked'))
     .reduce((acc, name) => acc.concat(dataStore[name.value]), [])
 
-  console.log(form.sortby.value)
   const sortMethod = {
     'downloads_count': (a, b) => a.downloads_count > b.downloads_count ? -1 : 1,
     'released_at': (a, b) => new Date(a.latest_release.released_at) > new Date(b.latest_release.released_at) ? -1 : 1,
@@ -392,14 +393,13 @@ function updateModsListing() {
     .sort(sortMethod)
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
-      const isOutdated = isInstalled && outdated(mod.latest_release.file_name)
+      const isOutdated = outdated(mod.latest_release.file_name)
       const inPack = modIds.includes('' + mod.id)
 
       const include =
         (filters.installed ? `${isInstalled}` === filters.installed : true) &&
         (filters.owner ? mod.owner === filters.owner : true) &&
         (filters.packs(mod)) &&
-        // (filters.packs.length ? filters.packs.some(p => reverseLookup[mod.id] && reverseLookup[mod.id].includes(p)) : true) &&
         (filters.title ? mod.title.toLowerCase().indexOf(filters.title) > -1 : true) &&
         (filters.update ? `${isOutdated}` === filters.update : true) &&
         (filters.version ? `${mod.latest_release.factorio_version}` === filters.version : true)
@@ -411,7 +411,7 @@ function updateModsListing() {
         file_name: mod.latest_release.file_name,
         id: mod.id,
         installed: isInstalled ? 'Yup' : 'Nope',
-        outdated: isOutdated ? '<small class="badge">Outdated</small>' : '',
+        outdated: isOutdated ? '<small class="badge badge--warn">Outdated</small>' : '',
         owner: mod.owner.trim(),
         released_at: mod.latest_release.released_at,
         summary: mod.summary,
@@ -483,6 +483,10 @@ function updatePacksListing() {
 
   const manageList = document.forms.manager['packs-list']
 
+  const selected = Array.from(manageList
+    .querySelectorAll(':checked'))
+    .map(opt => opt.value)
+
   Array.from(manageList.querySelectorAll('legend ~ *'))
     .forEach(el => manageList.removeChild(el))
 
@@ -495,6 +499,7 @@ function updatePacksListing() {
     input.setAttribute('name', 'picks')
     input.setAttribute('type', 'checkbox')
     input.setAttribute('value', name)
+    selected.includes(name) && input.setAttribute('checked', true)
 
     label.classList.add('pill__item', 'pack-item')
     label.innerHTML = `${name} (${dataStore[name].length})`
@@ -541,6 +546,7 @@ function updateFactorioVersions() {
 }
 
 function writeModsCache(all) {
+  allMods = all
 
   return new Promise((resolve, reject) => {
     const content = JSON.stringify(all, null, 4)

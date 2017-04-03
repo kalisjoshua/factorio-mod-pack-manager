@@ -1,3 +1,15 @@
+.badge {
+  background: gainsboro;
+  border-radius: $radius;
+  color: white;
+  float: right;
+  font-size: 0.7em;
+  margin-right: $gutter;
+  padding: $gutter / 2 $gutter;
+
+  &--warn { background: $theme-orange; }
+}
+
 .col-owner { flex: 0 0; flex-basis: 12em; }
 .col-title { flex: 1 0; }
 
