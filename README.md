@@ -16,6 +16,7 @@ A way to manage groupings of mods for various games of Factorio.
 ## TODO
 
   - [ ] Bulk download of updated mods after cache refresh
+  - [ ] Disable "activate" button when clicked
   - [ ] (optional) Use IndexedDB for data storage; enable more complex querying
 
 

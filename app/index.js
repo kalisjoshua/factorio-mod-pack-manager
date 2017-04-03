@@ -72,32 +72,32 @@ function activeModsList() {
   const ids = Array.from(document.forms.manager['packs-list']
     .querySelectorAll(':checked'))
     .map(item => dataStore[item.value])
-    .join().split(',')
+    .join()
+    .split(',')
 
-  const missing = []
-  const mods = allMods
+  const format = (name, enabled) => ({ name, enabled })
+
+  const result = allMods
     .reduce((acc, mod) => {
-      if (ids.includes('' + mod.id)) {
-        // build mods-list.json
-        acc.push({ name: mod.name, enabled: true })
+      const enabled = ids.includes('' + mod.id)
+      const isInstalled = installed.includes(mod.latest_release.file_name)
+      const name = mod.name
 
-        // check for any uninstalled mods
-        if (!installed.includes(mod.latest_release.file_name)) {
-          missing.push({
-            file: mod.latest_release.file_name,
-            name: mod.name,
-            url: mod.latest_release.download_url,
-          })
-        }
+      isInstalled && acc.mods.push(format(name, enabled))
+
+      // check for any uninstalled mods
+      if (enabled && !isInstalled) {
+        acc.missing.push({
+          file: mod.latest_release.file_name,
+          name,
+          url: mod.latest_release.download_url,
+        })
       }
 
       return acc
-    }, [{ name: 'base', enabled: 'true' }])
+    }, { missing: [], mods: [format('base', true)]})
 
-  return {
-    missing,
-    mods,
-  }
+  return result
 }
 
 function addPackName(event) {
