@@ -2,6 +2,8 @@
 
 A way to manage groupings of mods for various games of Factorio.
 
+![Mod Manager Screenshot](./mod-manager.png)
+
 ## Setup
 
   1. Clone or Fork this - [Mod Pack Manager] - repository
