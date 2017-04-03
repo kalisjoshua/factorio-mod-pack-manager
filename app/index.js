@@ -49,8 +49,6 @@ function activateMods(event) {
 
     const { missing, mods } = activeModsList()
 
-    mods.push({ name: 'base', endabled: 'true' })
-
     const finalize = () =>
       fs.writeFileSync(filepath, JSON.stringify({ mods }, null, 4), 'utf-8')
 
@@ -94,7 +92,7 @@ function activeModsList() {
       }
 
       return acc
-    }, [])
+    }, [{ name: 'base', enabled: 'true' }])
 
   return {
     missing,
