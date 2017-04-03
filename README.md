@@ -1,6 +1,6 @@
 # factorio-mod-pack-manager
 
-A way to manage groupings of mods for various games of Factorio.
+A way to manage groupings of (local) mods for various games of Factorio.
 
 ![Mod Manager Screenshot](./mod-manager.png)
 
