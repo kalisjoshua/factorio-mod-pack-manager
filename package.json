@@ -16,6 +16,7 @@
     "precss:watch": "npm run css",
     "start": "export DEV=true && electron .",
     "prestart": "npm run css:watch",
+    "poststart": "npm run stop",
     "stop": ". bin/sass.sh stop",
     "zip": "npm run zip:mac",
     "zip:mac": "cd builds/mod-pack-manager-darwin-x64/ && zip -r mod-pack-manager.zip mod-pack-manager.app",
