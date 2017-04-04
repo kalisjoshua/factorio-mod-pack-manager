@@ -40,6 +40,12 @@ aside h1 {
 }
 
 .flex-container { display: flex; }
+@media not (max-width: 1300px) {
+  .flex-filter { flex-wrap: wrap; }
+  .flex-filter:after { content: ''; width: 100%; }
+  .flex-filter div:nth-of-type(n+4) { order: 1; }
+}
+
 .flex-grow { flex: 1 0; }
 
 .filter-headings {
@@ -48,6 +54,7 @@ aside h1 {
   margin: -$gutter;
   margin-bottom: $gutter;
   padding: $gutter * 2 $gutter;
+  padding-top: $gutter * 4;
 
   > div:nth-of-type(n+2) {
     margin-top: $gutter * 2;
