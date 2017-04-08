@@ -7,7 +7,8 @@ const getMods = require('./getMods')
 const modPortal = require('./modPortal')
 const notification = require('./notification')
 
-let allMods
+let modCache
+let modCacheIndex
 let dataStore
 try {
   dataStore = require(__dirname + '/dataStore.json')
@@ -23,6 +24,7 @@ const reverseLookup = Object.keys(dataStore)
     return acc;
   }, {})
 
+const nameFromZip = str => str.replace(/_\d+\.\d+\.\d+\.zip$/, '')
 // mods location
 const location = path
   .join(
@@ -36,11 +38,10 @@ const location = path
 // installed mods
 let installed = fs.readdirSync(location)
 const outdated = (function () {
-  const basename = str => str.replace(/_\d+\.\d+\.\d+\.zip$/, '')
   const lookup = installed
-    .reduce((acc, file) => (acc[basename(file)] = file, acc), {})
+    .reduce((acc, file) => (acc[nameFromZip(file)] = file, acc), {})
 
-  return file => lookup[basename(file)] && lookup[basename(file)] !== file
+  return file => lookup[nameFromZip(file)] && lookup[nameFromZip(file)] !== file
 }())
 
 function activateMods(event) {
@@ -80,30 +81,33 @@ function activeModsList() {
     .map(item => dataStore[item.value])
     .join()
     .split(',')
+    .filter(_ => !!_)
 
   const format = (name, enabled) => ({ name, enabled })
 
-  const result = allMods
-    .reduce((acc, mod) => {
-      const enabled = ids.includes('' + mod.id)
-      const isInstalled = installed.includes(mod.latest_release.file_name)
-      const name = mod.name
+  const base = format('base', true)
+  const have = installed
+    .filter(str => /zip$/.test(str))
+    .map(nameFromZip)
+    .map(name => format(name, ids.includes('' + modCacheIndex[name].id)))
 
-      isInstalled && acc.mods.push(format(name, enabled))
+  const missing = ids
+    .reduce((acc, id) => {
+      const mod = modCacheIndex[id]
+      const file = mod.latest_release.file_name
 
-      // check for any uninstalled mods
-      if (enabled && !isInstalled) {
-        acc.missing.push({
-          file: mod.latest_release.file_name,
-          name,
+      if (!installed.includes(file)) {
+        acc.push({
+          file,
+          name: nameFromZip(file),
           url: mod.latest_release.download_url,
         })
       }
 
       return acc
-    }, { missing: [], mods: [format('base', true)]})
+    }, [])
 
-  return result
+  return { missing, mods: [base].concat(have) }
 }
 
 function addPackName(event) {
@@ -223,10 +227,10 @@ function removeModPack(event) {
 
 function renderUI() {
   try {
-    allMods = require(__dirname + '/mod-cache.json')
+    modCache = require(__dirname + '/mod-cache.json')
   } catch (e) {
     fs.writeFileSync(__dirname + '/mod-cache.json', '{}', 'utf8')
-    allMods = {}
+    modCache = {}
   }
 
   notification()
@@ -345,7 +349,19 @@ function updateModCache(fn) {
 
   getMods()
     .then(writeModsCache)
+    .then(updateModCacheIndex)
     .then(fn)
+}
+
+function updateModCacheIndex() {
+  modCacheIndex = modCache
+    .reduce((acc, mod) => {
+      const name = mod.latest_release.info_json.name
+
+      acc[mod.id] = acc[name] = acc[nameFromZip(name)] = mod
+
+      return acc
+    }, {})
 }
 
 function updateModsHandler(event) {
@@ -399,7 +415,7 @@ function updateModsListing() {
     'title': (a, b) => a.title > b.title ? 1 : -1,
   }[form.sortby.value]
 
-  document.querySelector('.mods-listing').innerHTML = allMods
+  document.querySelector('.mods-listing').innerHTML = modCache
     .sort(sortMethod)
     .reduce((acc, mod) => {
       const isInstalled = installed.indexOf(mod.latest_release.file_name) > -1
@@ -473,7 +489,7 @@ function updateOwners() {
 
   const owners = new Set()
 
-  allMods
+  modCache
     .forEach(mod => owners.add(mod.owner))
 
   Array.from(owners)
@@ -540,7 +556,7 @@ function updateFactorioVersions() {
   const semanticOrder = str =>
     str.split('.').map(n => `0${n}`.slice(-2)).join('')
 
-  allMods
+  modCache
     .forEach(mod => versions.add(mod.latest_release.factorio_version))
 
   Array.from(versions)
@@ -556,7 +572,7 @@ function updateFactorioVersions() {
 }
 
 function writeModsCache(all) {
-  allMods = all
+  modCache = all
 
   return new Promise((resolve, reject) => {
     const content = JSON.stringify(all, null, 4)
@@ -572,4 +588,5 @@ document.forms.manager.dir.value = location
 
 fs.stat(path.join(__dirname, '/mod-cache.json'), function (err, stat) {
   err ? updateModCache(renderUI) : renderUI()
+  updateModCacheIndex()
 })
