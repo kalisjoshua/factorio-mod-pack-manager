@@ -15,8 +15,7 @@ A way to manage groupings of (local) mods for various games of Factorio.
 
 ## TODO
 
-  - [ ] Hide credentials inputs after successful download.
-  - [ ] Always provide a "base" mod pack that is pure vanilla.
+  - [ ] Always provide a "base" mod pack that is pure "vanilla".
   - [ ] Import existing setup if it doesn't match a mod pack.
   - [ ] Bulk download of updated mods; after cache refresh.
   - [ ] Use IndexedDB for data storage; enable more complex querying?

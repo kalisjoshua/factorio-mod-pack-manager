@@ -36,16 +36,12 @@ const location = path
   )
 
 // installed mods
-let installed = fs.readdirSync(location)
-const outdated = (function () {
-  const lookup = installed
-    .reduce((acc, file) => (acc[nameFromZip(file)] = file, acc), {})
+let installed
+let outdated
 
-  return file => lookup[nameFromZip(file)] && lookup[nameFromZip(file)] !== file
-}())
-
-function activateMods(event) {
-  const button = event.target
+function activateMods() {
+  const button = document.forms.manager
+    .querySelector('[data-action="activate"]')
   const disabledClass = 'btn--disabled'
 
   if (!button.classList.contains(disabledClass)) {
@@ -137,6 +133,16 @@ function afterCacheUpdate(button) {
   setTimeout(notification, 4000)
 }
 
+function authKeyDown(event) {
+  const attempt = event.keyCode === 13 &&
+    document.forms.manager.username.value &&
+    document.forms.manager.password.value
+
+  if (attempt) {
+    activateMods(event)
+  }
+}
+
 function downloadMods(list) {
   document.forms.manager.password
     .parentNode
@@ -163,6 +169,8 @@ function downloadMods(list) {
 
   return client
     .download(list, `${location}/`)
+    .then(updateInstalledMods)
+    .then(toggleAuthenticate)
 }
 
 function modToggle(event) {
@@ -233,6 +241,8 @@ function renderUI() {
     modCache = {}
   }
 
+  updateInstalledMods()
+
   notification()
   updateModsListing()
   updateOwners()
@@ -245,6 +255,12 @@ function renderUI() {
 
   document.forms.manager
     .addEventListener('submit', addPackName)
+
+  document.forms.manager.username
+    .addEventListener('keydown', authKeyDown)
+
+  document.forms.manager.password
+    .addEventListener('keydown', authKeyDown)
 
   document.forms.manager.isInstalled
     .addEventListener('change', updateModsListing)
@@ -337,8 +353,13 @@ function updateDataStore() {
 }
 
 function updateInstalledMods() {
-  // TODO: updating installed mods
-  alert('Sorry, not implemented yet.')
+  installed = fs.readdirSync(location)
+  outdated = (function () {
+    const lookup = installed
+      .reduce((acc, file) => (acc[nameFromZip(file)] = file, acc), {})
+
+    return file => lookup[nameFromZip(file)] && lookup[nameFromZip(file)] !== file
+  }())
 }
 
 function updateModCache(fn) {
@@ -362,6 +383,11 @@ function updateModCacheIndex() {
 
       return acc
     }, {})
+}
+
+function updateMods() {
+  // TODO: updating installed mods
+  alert('Sorry, not implemented yet.')
 }
 
 function updateModsHandler(event) {
