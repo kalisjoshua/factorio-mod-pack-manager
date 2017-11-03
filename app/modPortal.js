@@ -89,7 +89,7 @@ function zip(username, token, path, dest) {
 
 
 // const mod = '/api/downloads/data/mods/451/add-loader_0.0.8.zip'
-// const user = { username: 'kalisjoshua', password: 'troll6396' }
+// const user = { username: 'kalisjoshua', password: 'trolling' }
 // const dest = __dirname + '/add-loader.zip'
 //
 // download(user, mod, dest)
